@@ -2112,7 +2112,7 @@ function getCost(){
     );
 
   return nNew(
-    power.m*10000/(Math.log(upgradeTier)/Math.log(5)),
+    power.m*10000/(upgradeTier/100),
     power.e
   );
 
