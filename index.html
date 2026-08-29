@@ -1,0 +1,2846 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Micronym Merge</title>
+<style>
+@import url('https://cdnfonts.com');
+
+* { box-sizing:border-box; }
+
+html,body {
+  margin:0;
+  width:100%;
+  min-height:100%;
+  font-family:'Glacial Indifference',sans-serif!important;
+  user-select:none;
+}
+
+body {
+  background:rgb(0,0,253);
+  color:white;
+  font-weight:700;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:25px;
+}
+
+#s {
+  font-size:30px;
+  letter-spacing:2px;
+  margin-bottom:5px;
+}
+
+#p {
+  color:#f7b731;
+  font-size:16px;
+  margin-bottom:15px;
+  letter-spacing:1px;
+  animation:blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50% { opacity:.5; }
+}
+
+.controls {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+button {
+  padding:10px 15px;
+  font-weight:700;
+  font-size:14px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  letter-spacing:1px;
+  transition:.15s;
+}
+
+#uBtn {
+  background:#f7b731;
+  color:#1c1c24;
+}
+
+#resetBtn {
+  background:#ff4757;
+  color:white;
+}
+
+button:hover { transform:scale(1.04); }
+button:active { transform:scale(.96); }
+
+#uBtn:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+#g {
+  display:grid;
+  grid-template-columns:repeat(8,150px);
+  gap:8px;
+  background:#1c1c24;
+  padding:15px;
+  border-radius:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+
+.tile {
+  width:150px;
+  height:150px;
+  border-radius:12px;
+  border:2px solid rgba(255,255,255,.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:10px;
+  cursor:pointer;
+  overflow:hidden;
+  position:relative;
+  transition:transform .12s,filter .12s,box-shadow .12s;
+  color:white;
+  text-shadow:
+    0 2px 3px rgba(0,0,0,.8),
+    0 0 5px rgba(0,0,0,.5);
+}
+
+.tile:hover {
+  transform:scale(1.025);
+  filter:brightness(1.1);
+}
+
+.tile.empty {
+  background:#282833;
+  cursor:default;
+}
+
+.tile.selected {
+  transform:scale(.9);
+  border:3px solid white;
+  box-shadow:0 0 20px white;
+}
+
+.tile-name {
+  font-size:13px;
+  line-height:1.15;
+  overflow-wrap:anywhere;
+}
+
+.tile-tier {
+  position:absolute;
+  bottom:5px;
+  right:7px;
+  font-size:11px;
+  opacity:.75;
+}
+
+.leaderboard {
+  margin-top:20px;
+  background:#1c1c24;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,.3);
+  width:320px;
+  text-align:center;
+  color:white;
+  font-size:14px;
+}
+
+.leaderboard h3 {
+  margin:0 0 8px;
+  color:#f7b731;
+  font-size:16px;
+  letter-spacing:1px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="s">MONETY: 0</div>
+<div id="p">SPAWN KAFELKÓW: TIER 1</div>
+
+<div class="controls">
+  <button id="uBtn" onclick="buyUpgrade()">+1 BASE BLOCK</button>
+  <button id="resetBtn" onclick="resetGame()">RESET RUN</button>
+
+</div>
+
+<div id="g"></div>
+
+<div class="leaderboard">
+  <h3>🏆 TWÓJ REKORD RUNU</h3>
+  <div id="leaderboardList">Najlepszy kafel: Tier 1</div>
+</div>
+
+<script>
+
+/* =========================================================
+   YOUR COMPLETE MICRONYM / GOOGOLOGY LIST
+   ========================================================= */
+
+const tiers = [
+
+/* ===== VERY LARGE RECIPROCALS ===== */
+
+{name:"One Infinitieth",value:"1/∞"},
+{name:"One Oblivionth Infinity’th",value:"1/Oblivion"},
+{name:"One Large Number Garden Number-th",value:"1/f₁₀(10 ↑10 10)"},
+{name:"One Rayo’s Number-th",value:"1/Rayo₁₀(10¹⁰⁰)"},
+{name:"One Loader’s Number-th",value:"1/D₅(99)"},
+{name:"One Big Hoss-th",value:"1/{100, 100 ///…/// 2}"},
+{name:"One Golapulusth",value:"1/{10, 100 [1 [1 [2 ⬧ 2] 2] 2] 2}"},
+{name:"One Simple Subcubic Graph Three-th",value:"1/SSCG(3)"},
+{name:"One Tree Theorem Three-th",value:"1/TREE(3)"},
+{name:"One Tethratopeth",value:"1/{100, 100 [1 [2 ¬ 2] 2] 2}"},
+{name:"One Hektotetromth",value:"1/{10, 49 [1 \\ 2] 2}"},
+{name:"One Quadritetromth",value:"1/{10, 10 [1 [2] 2] 2}"},
+{name:"One Bongulusth",value:"1/{10, 100 [1, 1, 2] 2}"},
+{name:"One Dimendecalth",value:"1/{10, 10 [11] 2}"},
+{name:"One Xappolth",value:"1/{10, 10 [3] 2}"},
+{name:"Okojo-Ermine Number",value:"1/Oe(54)"},
+{name:"One Iteralth",value:"1/{10, 10 [2] 2}"},
+{name:"One Tetradecalth",value:"1/{10, 10, 10, 10}"},
+{name:"Gatekim",value:"1/G100"},
+{name:"Reciprocal Graham",value:"1/G64"},
+{name:"One Boogolth",value:"1/10{100}10"},
+
+/* ===== VOID / HUGE NUMBER RECIPROCALS ===== */
+
+{name:"Voidend",value:"(10↑↑↑10)-1"},
+{name:"Void Fire",value:"(9↑↑8↑↑7↑↑6↑↑5↑↑4↑↑3↑↑2)-1"},
+{name:"Void Onionmine",value:"(10↑↑21,042,141,113,214,300215)-1"},
+{name:"Voidmine",value:"(10↑↑215)-1"},
+{name:"One Deckerth",value:"1/(10↑↑10)"},
+{name:"Betillion",value:"(10↑↑9)-1"},
+{name:"Gammillion",value:"(10↑↑8)-1"},
+{name:"Deltillion",value:"(10↑↑7)-1"},
+{name:"Epsillion",value:"(10↑↑6)-1"},
+
+{name:"Googolplexianminex",value:"10^(-10^10^10^100)"},
+{name:"Zetillion",value:"10^(-10^10^10^10)"},
+{name:"Void Super Photillion",value:"10^(-10^10^1,000,000)"},
+{name:"Void Super Higgsbillion",value:"10^(-10^10^3,000)"},
+{name:"Void Super Axillion",value:"10^(-10^10^1,500)"},
+{name:"Googolpleximinex",value:"10^(-10^10^100)"},
+{name:"Etillion",value:"10^(-10^10^10)"},
+{name:"Thetillion",value:"10^(-10^10^9)"},
+{name:"Void Photillion",value:"10^(-10^1,000,000)"},
+{name:"Void Higgsbillion",value:"10^(-10^3,000)"},
+{name:"Void Axillion",value:"10^(-10^1,500)"},
+{name:"Void Inflatillion",value:"10^(-10^750)"},
+{name:"Googolminex",value:"10^(-10^100)"},
+
+{name:"Atokyillion",value:"10^(-1.2 × 10¹⁴)"},
+{name:"Photillion",value:"10^(-1,000,000)"},
+{name:"Iotillion",value:"10^(-10⁵)"},
+{name:"Kappillion",value:"10^(-31622.776…)"},
+{name:"Glillion",value:"10^(-10⁴)"},
+{name:"Bosillion WZ",value:"10^(-5,000)"},
+{name:"Higgsbillion",value:"10^(-3,000)"},
+{name:"Electrillion",value:"10^(-2,750)"},
+{name:"Positillion",value:"10^(-2,500)"},
+{name:"Muillion",value:"10^(-2,250)"},
+{name:"Taillion",value:"10^(-2,000)"},
+{name:"Qu-killion",value:"4 × 10^(-1,800)"},
+{name:"Di-gammillion",value:"2 × 10^(-1,777)"},
+{name:"Axillion",value:"10^(-1,500)"},
+{name:"Curvatillion",value:"10^(-1,416.64)"},
+{name:"Dilatillion",value:"10^(-1,000)"},
+{name:"Lambdillion",value:"10^(-999)"},
+{name:"Gravitillion",value:"10^(-900)"},
+{name:"Du-gravitillion",value:"2 × 10^(-900)"},
+{name:"Graviphotillion",value:"10^(-840)"},
+{name:"Inflatillion",value:"10^(-750)"},
+{name:"Lept-qu-killion",value:"3740^(-450)"},
+{name:"Majoronillion",value:"10^(-417.19)"},
+{name:"Preonillion",value:"10^(-350)"},
+{name:"Tachyillion",value:"10^(-333.333)"},
+{name:"H-bosillion WZ",value:"10^(-245)"},
+{name:"Bossilion XY",value:"10^(-220)"},
+{name:"Skyrillion",value:"10^(-200)"},
+{name:"Glubillion",value:"10^(-175)"},
+{name:"Themesillion",value:"10^(-140)"},
+{name:"Temesillion",value:"10^(-120)"},
+
+/* ===== ADDITIONAL MICRONYMS ===== */
+
+{name:"Googol-minutia-speck",value:"10^(-110)"},
+{name:"Googol-minutia",value:"10^(-100)"},
+{name:"Ogol-minutia",value:"10^(-80)"},
+{name:"One vigintillionth",value:"10^(-63)"},
+{name:"Protillion",value:"10^(-61)"},
+{name:"Neutrillion",value:"10^(-60)"},
+{name:"Del-barillion",value:"1.4 × 10^(-60)"},
+{name:"Lam-barillion",value:"1.7 × 10^(-60)"},
+{name:"Sig-barillion",value:"2 × 10^(-60)"},
+{name:"Xi-barillion",value:"2.5 × 10^(-60)"},
+{name:"Om-Barillion",value:"5 × 10^(-60)"},
+{name:"Pillion",value:"10^(-50.31415)"},
+{name:"Gogol-minutia",value:"10^(-50)"},
+{name:"Rhomesillion",value:"10^(-45)"},
+{name:"Planck time, in seconds",value:"5.39 × 10^(-44)"},
+{name:"Weak etamesillion",value:"10^(-41)"},
+{name:"Etamesillion",value:"10^(-40)"},
+{name:"Phi-mesillion",value:"1.1 × 10^(-40)"},
+{name:"Psi-mesillion",value:"1.2 × 10^(-40)"},
+{name:"Om-mesillion",value:"1.3 × 10^(-40)"},
+{name:"Goby-minutia",value:"10^(-35)"},
+{name:"Planck length, in meters",value:"1.616 × 10^(-35)"},
+{name:"One decillionth",value:"10^(-33)"},
+{name:"Short yi-bucket",value:"7 × 10^(-31)"},
+{name:"One nonillionth",value:"10^(-30)"},
+{name:"One octillionth",value:"10^(-27)"},
+{name:"Minnow-minutia",value:"10^(-25)"},
+{name:"One septillionth",value:"10^(-24)"},
+{name:"Demesillion",value:"10^(-22)"},
+{name:"One sextillionth",value:"10^(-21)"},
+{name:"Guppy-minutia",value:"10^(-20)"},
+{name:"Qu-tetrakillion",value:"4 × 10^(-20)"},
+{name:"Qu-pentakillion",value:"5 × 10^(-20)"},
+{name:"One quintillionth",value:"10^(-18)"},
+{name:"Attillion",value:"10^(-16)"},
+{name:"One quadrillionth",value:"10^(-15)"},
+{name:"Strong atillion",value:"5 × 10^(-15)"},
+{name:"Long yi-bucket",value:"7.67 × 10^(-14)"},
+{name:"Anyillion",value:"10^(-13)"},
+{name:"One trillionth",value:"10^(-12)"},
+{name:"Dropetillion",value:"10^(-11)"},
+{name:"Excitillion",value:"10^(-10)"},
+{name:"One billionth",value:"10^(-9)"},
+{name:"Magnillion",value:"10^(-8)"},
+{name:"Phonillion",value:"10^(-7)"},
+{name:"One millionth",value:"10^(-6)"},
+{name:"Eyelash mite-speck",value:"2 × 10^(-6)"},
+{name:"Dust mite-speck",value:"5 × 10^(-6)"},
+{name:"Cheese mite-speck",value:"8 × 10^(-6)"},
+{name:"Plasmillion",value:"10^(-5)"},
+{name:"Clover mite-speck",value:"2 × 10^(-5)"},
+{name:"Polaritillion",value:"10^(-4)"},
+{name:"One thousandth",value:"10^(-3)"},
+{name:"One hundredth",value:"10^(-2)"},
+{name:"One fiftieth",value:"1/50"},
+{name:"One thirtieth",value:"1/30"},
+{name:"One tenth",value:"1/10"},
+{name:"One ninth",value:"1/9"},
+{name:"Kepler–Bouwkamp constant",value:"0.11494204485329620070…"},
+{name:"Champernowne constant",value:"0.12345678910111213141516…"},
+{name:"One eighth",value:"1/8"},
+{name:"One seventh",value:"1/7"},
+{name:"One sixth",value:"1/6"},
+{name:"One fifth",value:"1/5"},
+{name:"i^i",value:"0.2078795763…"},
+{name:"One fourth",value:"1/4"},
+{name:"Bernstein's constant",value:"0.2801694990"},
+{name:"Pi tenths",value:"π/10"},
+{name:"One third",value:"1/3"},
+{name:"Hafner-Sarnak-McCurley constant",value:"0.3532363718"},
+{name:"Two fifths",value:"2/5"},
+{name:"One half",value:"1/2"},
+{name:"Omega constant ✤",value:"0.56714329040978387299…"},
+{name:"Euler-Mascheroni constant ✤",value:"0.57721566490153286060…"},
+{name:"Three fifths",value:"3/5"},
+{name:"Golden ratio conjugate",value:"(√5 - 1)/2"},
+{name:"Two thirds",value:"2/3"},
+{name:"Three fourths",value:"3/4"},
+{name:"Four fifths",value:"4/5"},
+{name:"Gauss's constant",value:"0.8346268416"},
+{name:"Eight ninths",value:"8/9"},
+{name:"Nine tenths",value:"9/10"},
+{name:"Ten elevenths",value:"10/11"},
+{name:"Eleven twelfths",value:"11/12"},
+{name:"Nineteen twentieths",value:"19/20"},
+{name:"Forty-nine fiftieths",value:"49/50"},
+{name:"Ninety-nine hundredths",value:"99/100"},
+{name:"One",value:"1"},
+{name:"Twelve-thousandth root of two",value:"1.00057778951…"}, 
+{name:"Twelfth root of two",value:"1.05946309435929526456…"}, 
+{name:"Lévy’s constant",value:"1.186569…"}, 
+{name:"Apéry’s constant",value:"1.20205690315959428539…"}, 
+{name:"Cube root of two",value:"1.259921…"}, 
+{name:"Glaisher-Kinkelin constant",value:"1.2824271291…"}, 
+{name:"Conway’s constant",value:"1.3035772690…"}, 
+{name:"Mills’ constant",value:"1.306377…"}, 
+{name:"Plastic ratio",value:"1.3247179572…"}, 
+{name:"Square root of two",value:"1.4142135623…"}, 
+{name:"Backhouse’s Constant",value:"1.45607…"}, 
+{name:"Supergolden ratio",value:"1.46557123187676…"}, 
+{name:"Three halves",value:"1.5"}, 
+{name:"Super Square Root of Two",value:"1.559610…"}, 
+{name:"Triangular root of two",value:"1.561552…"}, 
+{name:"Erdős-Borwein constant",value:"1.6066951524…"}, 
+{name:"Phi",value:"1.61803398874989…"}, 
+{name:"Square root of three",value:"1.7320508075…"}, 
+{name:"Square root of pi",value:"1.772453850905516…"},
+{name:"Komornik-Loreti constant",value:"1.787231650…"}, 
+{name:"Tribonacci constant",value:"1.83929…"}, 
+{name:"Two",value:"2"}, 
+{name:"Universal parabolic constant",value:"2.2955871493…"}, 
+{name:"Silver ratio",value:"2.414213562373095…"}, 
+{name:"Feigenbaum bifurcation parameter",value:"2.5029078750…"}, 
+{name:"Khinchin’s constant",value:"2.6854520010…"}, 
+{name:"Euler’s number",value:"2.7182818284…"}, 
+{name:"Three",value:"3"}, 
+{name:"Pi",value:"3.1415926535…"}, 
+{name:"Bronze ratio",value:"3.3027756377319946465…"}, 
+{name:"Four",value:"4"}, 
+{name:"Feigenbaum bifurcation velocity",value:"4.6692016091…"}, 
+{name:"Five",value:"5"}, 
+{name:"Six",value:"6"}, 
+{name:"Tau",value:"6.283185307179586…"}, 
+{name:"Seven",value:"7"}, 
+{name:"Dwarf angel number",value:"7.77"}, 
+{name:"Eight",value:"8"},  
+{name:"Nine",value:"9"},  
+{name:"Ten",value:"10"}, 
+{name:"Eleven",value:"11"}, 
+{name:"Twelve",value:"12"}, 
+{name:"Thirteen",value:"13"}, 
+{name:"Fourteen",value:"14"}, 
+{name:"Fifteen",value:"15"}, 
+{name:"Sixteen",value:"16"}, 
+{name:"Seventeen",value:"17"}, 
+{name:"Eighteen",value:"18"}, 
+{name:"Nineteen",value:"19"}, 
+{name:"Twenty",value:"20"}, 
+{name:"Twenty-one",value:"21"}, 
+{name:"Twenty-two",value:"22"}, 
+{name:"Twenty-three",value:"23"}, 
+{name:"Gelfond's constant",value:"23.1406926327…"}, 
+{name:"Twenty-four",value:"24"}, 
+{name:"Unusual",value:"24.814"}, 
+{name:"Twenty-five",value:"25"}, 
+{name:"Twenty-six",value:"26"}, 
+{name:"Twenty-seven",value:"27"}, 
+{name:"Twenty-eight",value:"28"}, 
+{name:"Thirty",value:"30"}, 
+{name:"Thirty-one",value:"31"}, 
+{name:"Thirty-two",value:"32"}, 
+{name:"Thirty-three",value:"33"}, 
+{name:"Thirty-six",value:"36"}, 
+{name:"Forty",value:"40"}, 
+{name:"Forty-eight",value:"48"}, 
+{name:"Forty-nine",value:"49"}, 
+{name:"Fifty",value:"50"}, 
+{name:"Fifty-Five",value:"55"}, 
+{name:"Sixty",value:"60"}, 
+{name:"Sixty-four",value:"64"}, 
+{name:"Sixty-six",value:"66"}, 
+{name:"Sixty-nine",value:"69"}, 
+{name:"Seventy",value:"70"}, 
+{name:"Seventy Eight",value:"78"}, 
+{name:"Eighty",value:"80"}, 
+{name:"Eighty-one",value:"81"}, 
+{name:"Ninety",value:"90"}, 
+{name:"Hundred",value:"100"},
+{name:"One hundred seven",value:"107"}, 
+{name:"One hundred thirteen",value:"113"}, 
+{name:"Piektā vienība",value:"120"}, 
+{name:"One hundred twenty-one",value:"121"}, 
+{name:"One hundred twenty-three",value:"123"}, 
+{name:"One hundred twenty-five",value:"125"}, 
+{name:"One hundred twenty-seven",value:"127"}, 
+{name:"One hundred thirty-six",value:"136"},
+{name:"One hundred forty-four",value:"144"}, 
+{name:"One hundred sixty-nine",value:"169"}, 
+{name:"One hundred ninety-six",value:"196"}, 
+{name:"Two hundred",value:"200"}, 
+{name:"Two hundred sixteen",value:"216"}, 
+{name:"Two hundred twenty",value:"220"}, 
+{name:"Two hundred twenty-five",value:"225"}, 
+{name:"Two hundred fifty-six",value:"256"}, 
+{name:"Two Hundred Eighty Four",value:"284"}, 
+{name:"Two Hundred Eighty Nine",value:"289"}, 
+{name:"Three Hundred Twenty Four",value:"324"}, 
+{name:"Three Hundred Forty Three",value:"343"}, 
+{name:"Three Hundred Sixty One",value:"361"}, 
+{name:"Four Hundred",value:"400"}, 
+{name:"Four Hundred Twenty",value:"420"}, 
+{name:"Four Hundred Ninety Six",value:"496"}, 
+{name:"Five Hundred Twelve",value:"512"}, 
+{name:"Five Hundred Sixty Five",value:"565"}, 
+{name:"Six hundred",value:"600"}, 
+{name:"Six Hundred Twenty Five",value:"625"}, 
+{name:"Six Hundred Fifty Six",value:"656"}, 
+{name:"Beast Number",value:"666"}, 
+{name:"Seven Hundred Twenty Seven",value:"727"}, 
+{name:"Seven Hundred Twenty Nine",value:"729"}, 
+{name:"Seven Hundred Seventy Seven",value:"777"}, 
+{name:"Nine Hundred Forty",value:"940"}, 
+{name:"Nine Hundred Forty Five",value:"945"}, 
+{name:"One Thousand",value:"1000"}, 
+{name:"One Thousand Twenty Four",value:"1024"}, 
+{name:"One Thousand Two Hundred Ninety Six",value:"1296"}, 
+{name:"One Thousand Three Hundred Thirty One",value:"1331"}, 
+{name:"One Thousand Three Hundred Eighty Five",value:"1385"}, 
+{name:"Piplex",value:"1385.4557313670107…"}, 
+{name:"One Thousand Seven Hundred Twenty Eight",value:"1728"}, 
+{name:"One Thousand Nine Hundred Fifty Eight",value:"1958"}, 
+{name:"Two Thousand Twenty Six",value:"2026"}, 
+{name:"Two Thousand Forty Seven",value:"2047"}, 
+{name:"Two Thousand Forty Eight",value:"2048"}, 
+{name:"Two Thousand One Hundred Ninety Seven",value:"2197"}, 
+{name:"Two Thousand Four Hundred One",value:"2401"}, 
+{name:"Two Thousand Six Hundred Fifty Six",value:"2656"}, 
+{name:"Two Thousand Seven Hundred Forty Four",value:"2744"}, 
+{name:"Two Thousand Seven Hundred Sixty Three",value:"2763"}, 
+{name:"Three Thousand One Hundred Twenty Five",value:"3125"}, 
+{name:"Three Thousand Three Hundred twenty Five",value:"3325"}, 
+{name:"Four Thousand Ninety Six",value:"4096"}, 
+{name:"Four Thousand Nine Hundred Thirteen",value:"4913"}, 
+{name:"Five Thousand Eight Hundred Thirty Two",value:"5832"}, 
+{name:"Six Thousand Five Hundred Sixty One",value:"6561"}, 
+{name:"Six Thousand Eight Hundred Fifty Nine",value:"6859"}, 
+{name:"Eight Thousand",value:"8000"}, 
+{name:"Eight Thousand One Hundred Twenty Eight",value:"8128"}, 
+{name:"Eight Thousand One Hundred Ninety One",value:"8191"}, 
+{name:"Nine Thousand",value:"9000"}, 
+{name:"Myriad",value:"10000"}, 
+{name:"Fourteen Thousand Six Hundred Sixty One",value:"14641"}, 
+{name:"Twenty Thousand Seven Hundred Thirty Six",value:"20736"}, 
+{name:"Twenty Eight Thousand Five Hundred Sixty One",value:"28561"}, 
+{name:"Thirty Eight Thousand Four Hundred Sixteen",value:"38416"}, 
+{name:"Forty Six Thousand Six Hundred Fifty Six",value:"46656"}, 
+{name:"Fifty Thousand Six Hundred Twenty Five",value:"50625"}, 
+{name:"Sixty Five Thousand Five Hundred Thirty Six",value:"65536"}, 
+{name:"Sixty Nine Thousand Four Hundred Twenty",value:"69420"}, 
+{name:"Eighty Three Thousand Five Hundred Twenty One",value:"83521"}, 
+{name:"Ninety Seven Thousand One Hundred And Four",value:"97104"}, 
+{name:"Lakh",value:"100000"}, 
+{name:"One Hundred Four Thousand Nine Hundred Seventy Six",value:"104976"},
+{name:"One Hundred Thirty Thousand Three Hundred Twenty One",value:"130321"},
+{name:"One Hundred Thirty One Thousand Seventy One",value:"131071"},
+{name:"Integral-Megaseptile",value:"142857"},
+{name:"One Hundred Sixty Thousand",value:"160000"},
+{name:"Two Hundred Forty Eight Thousand Eight Hundred Thirty Two",value:"248832"},
+{name:"Five Hundred Twenty Four Thousand Two Hundred Eighty Seven",value:"524287"},
+{name:"Eight Hundred Twenty Three Thousand Five Hundred Forty Three",value:"823543"},
+{name:"One Million",value:"1000000"},
+{name:"One Million Forty Eight Thousand Five Hundred Seventy Six",value:"1048576"},
+{name:"Two Million Nine Hundred Eighty Five Thousand Nine Hundred Eighty Four",value:"2985984"},
+{name:"Crore",value:"10000000"},
+{name:"Distance to the Far Lands in Minecraft in blocks from X/Z: (Alpha 1.0.0 to Beta 1.7.3)",value:"12550824.047503550492977913888126"},
+{name:"Sixteen Million Seven Hundred Seventy Seven Thousand Two Hundred Sixteen",value:"16777216"},
+{name:"Fifth Perfect Number",value:"33550336"},
+{name:"Thirty Five Million Eight Hundred Thirty One Thousand Eight Hundred Eight",value:"35831808"},
+{name:"The Polar Circumference of the Earth in meters",value:"40007863"},
+{name:"The Equatorial Circumference of the Earth in meters",value:"40075017"},
+{name:"Myllion/Octad",value:"100000000"},
+{name:"The speed of light (in meters per second, c)",value:"299792458"},
+{name:"Three Hundred Eighty Seven Million Four Hundred Twenty Thousand Four Hundred Eighty Nine",value:"387420489"},
+{name:"Four Hundred Twenty Nine Million Nine Hundred Eighty One Thousand Six Hundred Ninety Six",value:"429981696"},
+{name:"One Billion",value:"1000000000"},
+{name:"Distance to the Farther Lands in Minecraft, in blocks, from X/Z: ±0",value:"1004065923.8002840394382331110501"},
+{name:"Highest number a human could count to in a lifetime",value:"1114063345"},
+{name:"One Billion Two Hundred Thirty Four Million Five Hundred Sixty Seven Thousand Eight Hundred Ninety",value:"1234567890"},
+{name:"8th Mersenne Prime",value:"2147483647"},
+{name:"Age in seconds of the oldest person who ever lived (as of January 2023)",value:"3864196800"},
+{name:"Sixth Perfect Number",value:"8589869056"},
+{name:"Dialogue/Ten Billion",value:"10000000000"},
+{name:"Kharab/Hundred Billion",value:"100000000000"},
+{name:"Seventh Perfect Number",value:"137438691328"},
+{name:"Average Earth-Sun Distance in Meters",value:"149597870700"},
+{name:"Eleven Tetrated to Two",value:"11^11"},
+{name:"One Trillion",value:"1000000000000"},
+{name:"Three Tetrated to Three",value:"3^3^3"},
+{name:"Twelve Tetrated to Two",value:"12^12"},
+{name:"Integral-Dekapentseptemdecile",value:"588235294117647"},
+{name:"tree(3)",value:"844424930131960"},
+{name:"One Quadrillion",value:"10^15"},
+{name:"Byllion",value:"10^16"},
+{name:"Integral-Exaundevigintile",value:"52631578947368421"},
+{name:"Ramanujan Constant",value:"262537412640768744"},
+{name:"One Quintillion",value:"10^18"},
+{name:"Eighth Perfect Number",value:"2305843008139952128"},
+{name:"9th Mersenne Prime",value:"2395843009213693951"},
+{name:"Maximum 64-bit Signed Integer",value:"9223372036854775807"},
+{name:"Guppy",value:"10^20"},
+{name:"Integral-Dekazettatrevigintile",value:"434782608695652173913"},
+{name:"One Sextillion",value:"10^21"},
+{name:"Avogadro Constant",value:"6.02214076e23"},
+{name:"One Septillion",value:"10^24"},
+{name:"Integral-Myriayottaundetrigintile",value:"344827586206896551734137"},
+{name:"10th Mersenne Prime",value:"618970019642690137449562111"},
+{name:"One Octillion",value:"10^27"},
+{name:"Ten Octillion",value:"10^28"},
+{name:"One Nonillion",value:"10^30"},
+{name:"Tryllion",value:"10^32"},
+{name:"11th Mersenne Prime",value:"162259276829213363391578010288127"},
+{name:"One Decillion",value:"10^33"},
+{name:"One Undecillion",value:"10^36"},
+{name:"Ninth Perfect Number",value:"2658455991569831744654692615953842176"},
+{name:"12th Mersenne Prime",value:"170141183460469231731687303715884105727"},
+{name:"One Duodecillion",value:"10^39"},
+{name:"Ten Duodecillion",value:"10^40"},
+{name:"One Tredecillion",value:"10^42"},
+{name:"Integral-Dekazettayottaseptemquadragintile",value:"2.127659574468085e44"},
+{name:"One Quattuordecillion",value:"10^45"},
+{name:"One Quindecillion",value:"10^48"},
+{name:"Gogol",value:"10^50"},
+{name:"One Sexdecillion",value:"10^51"},
+{name:"Tenth Perfect Number",value:"1.915619426082361e53"},
+{name:"One Septendecillion",value:"10^54"},
+{name:"One Octodecillion",value:"10^57"},
+{name:"One Novemdecillion",value:"10^60"},
+{name:"One Vigintillion",value:"10^63"},
+{name:"Quadryllion",value:"10^64"},
+{name:"11th Perfect Number",value:"1.316e64"},
+{name:"One Unvigintillion",value:"10^66"},
+{name:"One Duovigintillion",value:"10^69"},
+{name:"One Trevigintillion",value:"10^72"},
+{name:"One Quattuorvigintillion",value:"10^75"},
+{name:"12th Perfect Number",value:"1.447e76"},
+{name:"One Quinvigintillion",value:"10^78"},
+{name:"Eddington Number",value:"136 × 2^256"},
+{name:"Ogol",value:"10^80"},
+{name:"One Sexvigintillion",value:"10^81"},
+{name:"One Septemvigintillion",value:"10^84"},
+{name:"One Octovigintillion",value:"10^87"},
+{name:"One Novemvigintillion",value:"10^90"},
+{name:"One Trigintillion",value:"10^93"},
+{name:"One Untrigintillion",value:"10^96"},
+{name:"One Duotrigintillion",value:"10^99"},
+{name:"Googol",value:"10^100"},
+{name:"Googol plus one",value:"10^100 + 1"},
+{name:"Googolteen",value:"10^100 + 10"},
+{name:"Gooprol",value:"10^100 + 267"},
+{name:"Googolty",value:"10^101"},
+{name:"One Tretrigintillion",value:"10^102"},
+{name:"One Quattuortrigintillion",value:"10^105"},
+{name:"One Quintrigintillion",value:"10^108"},
+{name:"One Sextrigintillion",value:"10^111"},
+{name:"One Septemtrigintillion",value:"10^114"},
+{name:"One Octotrigintillion",value:"10^117"},
+{name:"One Novemtrigintillion",value:"10^120"},
+{name:"Quadragintillion",value:"10^123"},
+{name:"Googolex",value:"5.63e124"},
+{name:"One Unquadragintillion",value:"10^126"},
+{name:"Quintyllion",value:"10^128"},
+{name:"One Duoquadragintillion",value:"10^129"},
+{name:"One Trequadragintillion",value:"10^132"},
+{name:"One Quattuorquadragintillion",value:"10^135"},
+{name:"One Quinquadragintillion",value:"10^138"},
+{name:"One Sesquadragintillion",value:"10^141"},
+{name:"One Octoquadragintillion",value:"10^147"},
+{name:"Gogol^3",value:"10^150"},
+{name:"Quinquagintillion",value:"10^153"},
+{name:"Four Tetrated to 3",value:"4^4^4"},
+{name:"13th Mersenne Prime",value:"6.847e156"},
+{name:"14th Mersenne Prime",value:"5.3113e182"},
+{name:"One Sexagintillion",value:"10^183"},
+{name:"(5!)!",value:"6.695e183"},
+{name:"Gargoogol",value:"10^200"},
+{name:"Septuagintillion",value:"10^213"},
+{name:"Octogintillion",value:"10^243"},
+{name:"Sextyllion",value:"10^256"},
+{name:"Nonagintillion",value:"10^273"},
+{name:"Thrargoogol",value:"10^300"},
+{name:"Centillion",value:"10^303"},
+{name:"Uncentillion",value:"10^306"},
+{name:"IEEE 754 Double Precision Limit",value:"1.7976931348e308"},
+{name:"Duocentillion",value:"10^309"},
+{name:"Trescentillion",value:"10^312"},
+{name:"13th Perfect Number",value:"10^314"},
+{name:"14th Perfect Number",value:"10^366"},
+{name:"Faxul",value:"7.88e374"},
+{name:"15th Mersenne Prime",value:"10^385"},
+{name:"Ogolding",value:"10^400"},
+{name:"Googolding",value:"10^500"},
+{name:"Septyllion",value:"10^512"},
+{name:"Twasbrillig's Digit Wall",value:"3.2507e549"},
+{name:"Crazyjimbo's Response",value:"5.6839e549"},
+{name:"Twasbrillig's Rebuttal",value:"5.6839e550"},
+{name:"Ducentillion",value:"10^603"},
+{name:"Largest Number on TI-89 Exact Mode",value:"2^2040-1"},
+{name:"16th Mersenne Prime",value:"10^663"},
+{name:"17th Mersenne Prime",value:"10^686"},
+{name:"15th Perfect Number",value:"10^770"},
+{name:"Trucentillion",value:"10^903"},
+{name:"18th Mersenne Prime",value:"10^968"},
+{name:"Largest Number on TI-89 Approximate Mode",value:"10^1000-10^986"},
+{name:"Googolchime",value:"10^1000"},
+{name:"Octyillion",value:"10^1024"},
+{name:"Quadringentillion",value:"10^1203"},
+{name:"19th Mersenne Prime",value:"10^1280"},
+{name:"16th Perfect Number",value:"10^1327"},
+{name:"20th Mersenne Prime",value:"10^1331"},
+{name:"17th Perfect Number",value:"10^1373"},
+{name:"Une See's Wall'O'Nines",value:"9e1440"},
+{name:"Quingentillion",value:"10^1503"},
+{name:"Twasbrillig's Return",value:"10^1735"},
+{name:"Blatm's First Entry",value:"10^1735"},
+{name:"Twasbrillig's Rebuttal II",value:"10^1735"},
+{name:"Sescentillion",value:"10^1803"},
+{name:"18th Perfect Number",value:"10^1937"},
+{name:"Gargoogolchime",value:"10^2000"},
+{name:"Nonyllion",value:"10^2048"},
+{name:"Septingentillion",value:"10^2103"},
+{name:"Five Tetrated To Three",value:"1.911e2184"},
+{name:"Octingentillion",value:"10^2403"},
+{name:"19th Perfect Number",value:"10^2561"},
+{name:"20th Perfect Number",value:"10^2663"},
+{name:"Nongentillion",value:"10^2703"},
+{name:"21st Mersenne Prime",value:"10^2917"},
+{name:"22nd Mersenne Prime",value:"10^2993"},
+{name:"Thrargoogolchime",value:"10^3000"},
+{name:"Millinillion",value:"10^3003"},
+{name:"23rd Mersenne Prime",value:"10^3376"},
+{name:"Decyllion",value:"10^4096"},
+{name:"Googolbell",value:"10^5000"},
+{name:"21st Perfect Number",value:"10^5834"},
+{name:"22nd Perfect Number",value:"10^5985"},
+{name:"24th Mersenne Prime",value:"10^6002"},
+{name:"Dumillinillion",value:"10^6003"},
+{name:"25th Mersenne Prime",value:"10^6533"},
+{name:"26th Mersenne Prime",value:"10^6987"},
+{name:"Undecyillion",value:"10^8192"},
+{name:"Trimillinillion",value:"10^9003"},
+{name:"Googoltoll",value:"10^10000"},
+{name:"Quadrimillinillion",value:"10^12003"},
+{name:"24th Perfect Number",value:"10^12003"},
+{name:"25th Perfect Number",value:"10^13066"},
+{name:"27th Mersenne Prime",value:"10^13395"},
+{name:"26th Perfect Number",value:"10^13973"},
+{name:"Quinmillinillion",value:"10^15003"},
+{name:"Duodecyllion",value:"10^16384"},
+{name:"Sexmillinillion",value:"10^18003"},
+{name:"Two Tetrated To Five",value:"2.003e19728"},
+{name:"Gargoogoltoll",value:"10^20000"},
+{name:"Septimillinillion",value:"10^21003"},
+{name:"Octimillinillion",value:"10^24003"},
+{name:"28th Mersenne Prime",value:"10^25962"},
+{name:"27th Perfect Number",value:"10^26790"},
+{name:"Nonimillinillion",value:"10^27003"},
+{name:"Thrargoogoltoll",value:"10^30000"},
+{name:"Decimillillion",value:"10^30003"},
+{name:"Tredecyllion",value:"10^32768"},
+{name:"29th Mersenne Prime",value:"10^33265"},
+{name:"10000!",value:"2.8462e35659"},
+{name:"Six Tetrated To Three",value:"10^36305"},
+{name:"30th Mersenne Prime",value:"10^39751"},
+{name:"28th Perfect Number",value:"10^51924"},
+{name:"31st Mersenne Prime",value:"10^65050"},
+{name:"Quattuordecyllion",value:"10^65536"},
+{name:"29th Perfect Number",value:"10^66530"},
+{name:"30th Perfect Number",value:"10^79502"},
+{name:"Hitchhiker's Number",value:"10^83298"},
+{name:"Gazillion",value:"10^86430"},
+{name:"Googolgong",value:"10^100000"},
+{name:"31st Perfect Number",value:"10^130100"},
+{name:"Quindecyllion",value:"10^131072"},
+{name:"32nd Mersenne Prime",value:"10^227832"},
+{name:"33rd Mersenne Prime",value:"10^258716"},
+{name:"Sexdecyllion",value:"10^262144"},
+{name:"Centimillillion",value:"10^300003"},
+{name:"34th Mersenne Prime",value:"10^388342"},
+{name:"35th Mersenne Prime",value:"10^420921"},
+{name:"32nd Perfect Number",value:"10^455663"},
+{name:"33rd Perfect Number",value:"10^517430"},
+{name:"Septendecyllion",value:"10^524288"},
+{name:"Seven Tetrated To Three",value:"10^695974"},
+{name:"34th Perfect Number",value:"10^757263"},
+{name:"35th Perfect Number",value:"10^841842"},
+{name:"36th Mersenne Prime",value:"10^895932"},
+{name:"37th Mersenne Prime",value:"10^909526"},
+{name:"Maximusmillion",value:"10^1000000"},
+{name:"Octodecyllion",value:"10^1048576"},
+{name:"36th Perfect Number",value:"10^1791864"},
+{name:"37th Perfect Number",value:"10^1819050"},
+{name:"Novemdecyllion",value:"10^2097152"},
+{name:"38th Mersenne Prime",value:"10^2098960"},
+{name:"Micrillion",value:"10^3000003"},
+{name:"39th Mersenne Prime",value:"10^4053946"},
+
+// Sub-Ordinal 2.3 — Post-Beyond Micrillion
+
+{name:"Vigintyllion",value:"10^4194304"},
+{name:"38th Perfect Number",value:"10^4197919"},
+{name:"Fzmillion",value:"10^6000000"},
+{name:"40th Mersenne Prime",value:"10^6320430"},
+{name:"41st Mersenne Prime",value:"10^7235733"},
+{name:"42nd Mersenne Prime",value:"10^7816230"},
+{name:"39th Perfect Number",value:"10^8107892"},
+{name:"Unvigintyllion",value:"10^8388608"},
+{name:"43rd Mersenne Prime",value:"10^9152052"},
+{name:"44th Mersenne Prime",value:"10^9808358"},
+{name:"Goospolplex",value:"10^10000000"},
+{name:"40th Perfect Number",value:"10^11185272"},
+{name:"46th Mersenne Prime",value:"10^12837064"},
+{name:"47th Mersenne Prime",value:"10^12978189"},
+{name:"41st Perfect Number",value:"10^14471465"},
+{name:"Eight Tetrated To Three",value:"10^15151335"},
+{name:"42nd Perfect Number",value:"10^15632458"},
+{name:"Duovigintyllion",value:"10^16777216"},
+{name:"48th Mersenne Prime",value:"10^17425170"},
+{name:"43rd Perfect Number",value:"10^18304103"},
+{name:"44th Perfect Number",value:"10^19616714"},
+{name:"49th Mersenne Prime",value:"10^22338618"},
+{name:"45th Perfect Number",value:"10^22370543"},
+{name:"50th Mersenne Prime",value:"10^23249425"},
+{name:"Largest Mersenne Prime",value:"10^24862048"},
+{name:"46th Perfect Number",value:"10^25674127"},
+{name:"47th Perfect Number",value:"10^25956377"},
+{name:"Trevigintyllion",value:"10^33554432"},
+{name:"48th Perfect Number",value:"10^34,850,340"},
+{name:"Largest Perfect Number",value:"10^44,677,235"},
+{name:"Quattuorvigintyllion",value:"10^67,108,864"},
+{name:"Googolbong",value:"10^100,000,000"},
+{name:"Quinvigintyllion",value:"10^134,217,728"},
+{name:"Sexvigintyllion",value:"10^268,435,456"},
+{name:"Nine Tetrated to Three",value:"10^369,693,099"},
+{name:"Septenvigintyllion",value:"10^536,870,912"},
+{name:"Maximusbillion",value:"10^1,000,000,000"},
+{name:"Octovigintyllion",value:"10^1,073,741,824"},
+{name:"Novemvigintyllion",value:"10^2,147,483,648"},
+{name:"Nanillion",value:"10^3,000,000,003"},
+{name:"Trigintyllion",value:"10^4,294,967,296"},
+{name:"Untrigintyllion",value:"10^8,589,934,592"},
+{name:"Fzbillion",value:"10^9,000,000,000"},
+
+{name:"Trialogue",value:"10^10,000,000,000"},
+{name:"Duotrigintyllion",value:"10^17,179,869,184"},
+{name:"Gartrialogue",value:"10^20,000,000,000"},
+{name:"Thrartrialogue",value:"10^30,000,000,000"},
+{name:"Tretrigintyillion",value:"10^34,359,738,368"},
+{name:"Quattuortrigintyllion",value:"10^68,719,476,736"},
+{name:"Googolthrong",value:"10^100,000,000,000"},
+{name:"Quintrigintyllion",value:"10^137,438,953,472"},
+{name:"Ballium's Number",value:"10^138,732,019,350"},
+{name:"Sextrigintyllion",value:"10^274,877,906,944"},
+{name:"Eleven Tetrated to Three",value:"10^297,121,486,765"},
+{name:"Septentrigintyllion",value:"10^549,755,813,888"},
+{name:"Maximustrillion",value:"10^1,000,000,000,000"},
+{name:"Octotrigintyllion",value:"10^1,099,511,627,776"},
+{name:"Novemtrigintyllion",value:"10^2,199,023,255,552"},
+{name:"Picillion",value:"10^3,000,000,000,003"},
+{name:"Quadragintyllion",value:"10^4,398,046,511,104"},
+{name:"Three Tetrated to Four",value:"10^7,625,597,484,987"},
+{name:"Unquadragintyllion",value:"10^8,796,023,022,208"},
+{name:"Twelve Tetrated to Three",value:"10^9,622,000,000,000"},
+{name:"Googolgandian/Googolquadrigong",value:"10^100,000,000,000,000"},
+{name:"Maximusquadrillion/Quadrilliplexion",value:"10^1,000,000,000,000,000"},
+{name:"Femtillion",value:"10^(3*10^15+3)"},
+{name:"Quinquagintyllion",value:"10^4,503,599,627,370,496"},
+{name:"Onionillion",value:"10^21,042,141,113,214,300"},
+{name:"Googolquintigong",value:"10^100,000,000,000,000,000"},
+{name:"Pi Tetrated to Four",value:"10^10^17.824..."},
+{name:"Maximusquintillion",value:"10^10^18"},
+{name:"Attillion",value:"10^(3*(10^18)+3)"},
+{name:"Sexagintyllion",value:"10^4,611,686,018,427,387,904"},
+{name:"Guppyplex/Googolsextigong",value:"10^10^20"},
+{name:"Maximussextillion",value:"10^10^21"},
+{name:"Zeptillion",value:"10^(3*(10^21)+3)"},
+{name:"Septuagintyllion",value:"10^(4.7224*10^21)"},
+{name:"Googolseptigong",value:"10^10^23"},
+{name:"Maximusseptillion",value:"10^10^24"},
+{name:"Yoctillion",value:"10^(3*(10^24)+3)"},
+{name:"Octogintyllion",value:"10^(4.8357*10^24)"},
+{name:"Googoloctigong",value:"10^10^26"},
+{name:"Little Foot",value:"10^3.2*10^26"},
+{name:"Maximusoctillion",value:"10^10^27"},
+{name:"Xonillion / Rontillion",value:"10^(3*(10^27)+3)"},
+{name:"Nonagintyllion",value:"10^(4.9518*10^27)"},
+{name:"Googolnonigong",value:"10^10^29"},
+{name:"Maximusnonillion",value:"10^10^30"},
+{name:"Vecillion / Quectillion",value:"10^(3*(10^30)+3)"},
+{name:"Centyllion",value:"10^(5.0706*10^30)"},
+{name:"Googoldecigong",value:"10^10^32"},
+{name:"Maximusdecillion",value:"10^10^33"},
+{name:"Mecillion",value:"10^(3*(10^33)+3)"},
+{name:"Duecillion",value:"10^(3*(10^36)+3)"},
+{name:"Trecillion",value:"10^(3*(10^39)+3)"},
+{name:"Tetrecillion",value:"10^(3*(10^42)+3)"},
+{name:"Pentecillion",value:"10^(3*(10^45)+3)"},
+{name:"Upper Bound for Ballium's Number",value:"10^10^48"},
+{name:"Hexecillion",value:"10^(3*(10^48)+3)"},
+{name:"Gogolplex",value:"10^10^50"},
+{name:"Heptecillion",value:"10^(3*(10^51)+3)"},
+{name:"Octecillion",value:"10^(3*(10^54)+3)"},
+{name:"Ennecillion",value:"10^(3*(10^57)+3)"},
+{name:"Icosillion",value:"10^(3*(10^60)+3)"},
+{name:"Ducentyllion",value:"10^(6.4278*10^60)"},
+{name:"Doppelgängion",value:"10^10^68"},
+{name:"Googolwall",value:"10^10^70"},
+{name:"Triacontillion",value:"10^(3*(10^90)+3)"},
+{name:"Trecentyllion",value:"10^(8.1481*10^90)"},
+{name:"Fifty-Six Tetrated to Three",value:"10^10^98.14"},
+{name:"Googolplex",value:"10^10^100"},
+{name:"Gooprolplex",value:"10^((10^100)+267)"},
+{name:"Gargoogolplex",value:"(10^10^100)^2"},
+{name:"Fifty Seven Tetrated to Three",value:"10^10^100.32936..."},
+{name:"Thrargoogolplex",value:"(10^10^100)^3"},
+{name:"Googol-bang",value:"(10^100)!"},
+// V3C — continued
+{name:"Tetracontillion",value:"10^(3*(10^120)+3)"},
+{name:"Quadringentyllion",value:"10^(1.0329*(10^121))"},
+{name:"Googolquadragintigong",value:"10^10^122"},
+{name:"Googolexplex",value:"10^(5.63*10^124)"},
+{name:"Pentacontillion",value:"10^(3*(10^150)+3)"},
+{name:"Quingentyllion",value:"10^(1.3094*(10^151))"},
+{name:"Googolquinquagintigong",value:"10^10^152"},
+{name:"Tritet Jr.",value:"10^10^153"},
+{name:"Hexacontillion",value:"10^(3*(10^180)+3)"},
+{name:"Sescentyllion",value:"10^(1.6598*(10^181))"},
+{name:"Googosexagintigong",value:"10^10^182"},
+{name:"Gargoogol-Plexed",value:"10^10^200"},
+{name:"Hundred Tetrated to Three",value:"100^100^100"},
+{name:"Heptacontillion",value:"10^(3*(10^210)+3)"},
+{name:"Septingentyllion",value:"10^(2.1041*(10^211))"},
+{name:"Googolseptuagintigong",value:"10^10^212"},
+{name:"Minecraftplex",value:"10^10^215"},
+{name:"Octacontillion",value:"10^(3*(10^240)+3)"},
+{name:"Octingentyllion",value:"10^(2.6672*(10^241))"},
+{name:"Googoloctogintigong",value:"10^10^242"},
+{name:"Promaxima",value:"10^10^245"},
+{name:"Ennacontillion",value:"10^(3*(10^270)+3)"},
+{name:"Nongentyllion",value:"10^(3.3811*(10^271))"},
+{name:"Googolnonagintigong",value:"10^10^272"},
+{name:"Thrargoogol-Plexed",value:"10^10^300"},
+{name:"Hectillion",value:"10^(3*(10^300)+3)"},
+{name:"Millyllion",value:"10^(4.286*(10^301))"},
+{name:"Googolcentigong",value:"10^10^302"},
+{name:"Ecetonplex",value:"10^10^303"},
+{name:"Googolplexichime",value:"10^10^1000"},
+{name:"Five Tetrated To Four",value:"10^10^2184"},
+{name:"Killillion",value:"10^(3*(10^3000)+3)"},
+{name:"Googolmilligong",value:"10^10^3002"},
+{name:"Myryllion",value:"10^(7.9802*(10^3010))"},
+{name:"Googolplexitoll",value:"10^10^10000"},
+{name:"Decimyryllion",value:"10^(3.996*(10^30103))"},
+{name:"Six Tetrated To Four",value:"10^10^36305"},
+{name:"Googolplexigong",value:"10^10^100000"},
+{name:"Gargoogolplexigong",value:"(10^10^100000)^2"},
+{name:"Thrargoogolplexigong",value:"(10^10^100000)^3"},
+{name:"Gargoogolgong-Plexed",value:"10^10^200000"},
+{name:"Binary-Googolplexigong",value:"2^2^100000"},
+{name:"Centimyryllion",value:"10^(3.9602*(10^301032))"},
+{name:"Seven Tetrated to Four",value:"10^10^695974"},
+{name:"Maximusmaximusmillion",value:"10^10^1000000"},
+{name:"Fzmaximusmaximusmillion",value:"10^10^1000006"},
+{name:"Megillion",value:"10^(3*(10^3000000)+3)"},
+{name:"Googolmicrigong",value:"10^10^3000002"},
+{name:"Eight Tetrated to Four",value:"10^10^15151335"},
+{name:"Googolplexibong",value:"10^10^100000000"},
+{name:"Nanyllion",value:"10^(1.8451*(10^301029996))"},
+{name:"Nine Tetrated to Four",value:"10^10^369693099"},
+{name:"Gigillion",value:"10^(3*(10^3000000000)+3)"},
+{name:"Tetralogue",value:"10^10^10^10"},
+{name:"Googolplexithrong",value:"10^10^100000000000"},
+{name:"Eleven Tetrated to Four",value:"11^11^11^11"},
+{name:"Picyllion",value:"10^2^((10^12)+2)"},
+{name:"Maximusmaximustrillion",value:"10^10^10^12"},
+{name:"Three Tetrated to Five",value:"3^3^3^3^3"},
+{name:"Twelve Tetrated to Four",value:"12^12^12^12"},
+{name:"Maximusmaximusguppy",value:"10^10^10^20"},
+{name:"Twenty Tetrated to Four",value:"20^20^20^20"},
+{name:"Quettillion",value:"10^(3*(10^(3*(10^30)))+3)"},
+{name:"Twenty-Four Tetrated to Four",value:"24^24^24^24"},
+{name:"First Skewes' number",value:"e^e^e^79"},
+{name:"Twenty-five tetrated to four",value:"25^25^25^25"},
+{name:"Maximusmaximusgogol",value:"10^10^10^50"},
+{name:"Ikillion",value:"10^(3*(10^(3*(10^60)))+3)"},
+{name:"Maximusmaximusogol",value:"10^10^10^80"},
+{name:"Trakillion",value:"10^(3*(10^(3*(10^90)))+3)"},
+{name:"Googolduplex",value:"10^10^10^100"},
+
+// Sub-Ordinal 2.6 — HyperTiers -illion
+{name:"Hotillion",value:"10^(3*(10^(3*(10^300)))+3)"},
+{name:"Maximusmaximuscentillion",value:"10^10^10^303"},
+{name:"Second Skewes' number",value:"e^e^e^e^7.705"},
+{name:"Googolduplexichime",value:"10^10^10^1000"},
+{name:"Kalillion",value:"10^(3*(10^(3*(10^3000)))+3)"},
+{name:"Dalillion",value:"10^(3*(10^(3*(10^6000)))+3)"},
+{name:"Tralillion",value:"10^(3*(10^(3*(10^9000)))+3)"},
+{name:"Talillion",value:"10^(3*(10^(3*(10^12000)))+3)"},
+{name:"Dakalillion",value:"10^(3*(10^(3*(10^30000)))+3)"},
+{name:"Googolduplexigong",value:"10^10^10^100000"},
+{name:"Hotalillion",value:"10^(3*(10^(3*(10^300000)))+3)"},
+{name:"Trimaximusmillion",value:"10^10^10^1000000"},
+{name:"Mejillion",value:"10^(3*(10^(3*(10^3000000)))+3)"},
+{name:"Googolplexianibong",value:"10^10^10^100000000"},
+{name:"Trimaximusbillion",value:"10^10^10^10^9"},
+{name:"Gijillion",value:"10^(3*(10^(3*(10^3000000000)))+3)"},
+{name:"Pentalogue",value:"10^10^10^10^10"},
+{name:"Astillion",value:"10^(3*(10^(3*(10^(3*(10^12)))))+3)"},
+{name:"Lunillion",value:"10^(3*(10^(3*(10^(3*(10^15)))))+3)"},
+{name:"Fermillion",value:"10^(3*(10^(3*(10^(3*(10^18)))))+3)"},
+{name:"Jovillion",value:"10^(3*(10^(3*(10^(3*(10^21)))))+3)"},
+{name:"Solillion",value:"10^(3*(10^(3*(10^(3*(10^24)))))+3)"},
+{name:"Betillion",value:"10^(3*(10^(3*(10^(3*(10^27)))))+3)"},
+{name:"Gaxillion",value:"10^(3*(10^(3*(10^(3*(10^30)))))+3)"},
+{name:"Glocillion",value:"10^(3*(10^(3*(10^(3*(10^33)))))+3)"},
+{name:"Supillion",value:"10^(3*(10^(3*(10^(3*(10^36)))))+3)"},
+{name:"Versillion",value:"10^(3*(10^(3*(10^(3*(10^39)))))+3)"},
+{name:"Multillion",value:"10^(3*(10^(3*(10^(3*(10^42)))))+3)"},
+{name:"Nonecxenultillion",value:"10^(3*(10^(3*(10^(3*(10^44)))))+3)"},
+{name:"Metillion",value:"10^(3*(10^(3*(10^(3*(10^45)))))+3)"},
+{name:"Xevillion",value:"10^(3*(10^(3*(10^(3*(10^48)))))+3)"},
+{name:"Hypillion",value:"10^(3*(10^(3*(10^(3*(10^51)))))+3)"},
+{name:"Omnillion",value:"10^(3*(10^(3*(10^(3*(10^54)))))+3)"},
+{name:"Outillion",value:"10^(3*(10^(3*(10^(3*(10^57)))))+3)"},
+{name:"Barrillion",value:"10^(3*(10^(3*(10^(3*(10^60)))))+3)"},
+{name:"Garrillion",value:"10^(3*(10^(3*(10^(3*(10^63)))))+3)"},
+{name:"Googoltriplex",value:"10^10^10^10^100"},
+{name:"Aarrillion",value:"10^(3*(10^(3*(10^(3*(10^120)))))+3)"},
+{name:"Lunarrillion",value:"10^(3*(10^(3*(10^(3*(10^150)))))+3)"},
+{name:"Fermarrillion",value:"10^(3*(10^(3*(10^(3*(10^180)))))+3)"},
+{name:"Jovarrillion",value:"10^(3*(10^(3*(10^(3*(10^210)))))+3)"},
+{name:"Solarrillion",value:"10^(3*(10^(3*(10^(3*(10^240)))))+3)"},
+{name:"Betarrillion",value:"10^(3*(10^(3*(10^(3*(10^270)))))+3)"},
+{name:"Hutillion",value:"10^(3*(10^(3*(10^(3*(10^300)))))+3)"},
+{name:"Trimaximuscentillion",value:"10^10^10^10^303"},
+{name:"Hepillion",value:"10^(3*(10^(3*(10^(3*(10^3000)))))+3)"},
+{name:"Googoltriplexigong",value:"10^10^10^10^100000"},
+{name:"Ottillion",value:"10^(3*(10^(3*(10^(3*(10^3000000)))))+3)"},
+{name:"Googoltriplexibong",value:"10^10^10^10^10^8"},
+{name:"Hexalogue",value:"10^10^10^10^10^10"},
+{name:"Googolquadriplex",value:"(10^)^ 5 100"},
+{name:"Ecetonquadriplex",value:"10^10^10^10^10^303"},
+{name:"Hapaxillion",value:"10^(3*(10^(3*(10^(3*(10^(3*(10^3000)))))))+3)"},
+{name:"Googolquadriplexigong",value:"10^10^10^10^10^10^5"},
+{name:"Heptalogue",value:"10^10^10^10^10^10^10"},
+{name:"Googolquintiplex",value:"(10^)^ 6 100"},
+{name:"Redillion",value:"10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^3000)))))))))+3)"},
+{name:"Crazyjimbo's Factorial-Power Tower",value:"(10^(10^(10^10!)!)!)!"},
+{name:"Rodan's Factorial-Power Tower",value:"(10^(10^(10^11!)!)!)!"},
+{name:"Octalogue",value:"10^10^10^10^10^10^10^10"},
+{name:"Googolsextiplex",value:"(10^)^ 7 100"},
+{name:"Erkillion",value:"10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^3000)))))))))))+3)"},
+{name:"Ennalogue",value:"10^10^10^10^10^10^10^10^10"},
+{name:"Googolseptiplex",value:"(10^)^ 8 100"},
+{name:"Izzillion",value:"10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^(3*(10^3000)))))))))))))+3)"},
+{name:"Meakoowillion",value:"10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^3000)))))))+3)"},
+{name:"Googoloctiplex",value:"(10^)^ 9 100"},
+{name:"Decker",value:"10^^10"},
+{name:"Hoonillion",value:"10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^(3*10^3000)))))))+3)"},
+{name:"Googolnoniplex",value:"(10^)^ 10 100"},
+{name:"Udekalogue",value:"10^^11"},
+{name:"Dodekalogue",value:"10^^12"},
+{name:"Googoldeciplex",value:"(10^)^ 11 100"},
+{name:"Megafugathirteen",value:"13^^13"},
+{name:"Icosalogue",value:"10^^20"},
+{name:"Megafugatwenty",value:"20^^20"},
+{name:"Googolvigintiplex",value:"(10^)^21 100"},
+{name:"Icosarillion",value:"Q(1,20)"},
+{name:"Triantalogue",value:"10^^30"},
+{name:"Terntalogue",value:"10^^40"},
+{name:"Penantalogue",value:"10^^50"},
+{name:"Googolquinquagintiplex",value:"(10^)^51 100"},
+{name:"Exatalogue",value:"10^^60"},
+{name:"Eptatalogue",value:"10^^70"},
+{name:"Ogdatalogue",value:"10^^80"},
+{name:"Entatalogue",value:"10^^90"},
+{name:"Giggol/Hectalogue",value:"10^^100"},
+{name:"Gargiggol",value:"(10^^100)^2"},
+{name:"Thrargiggol",value:"(10^^100)^3"},
+{name:"Giggol to the googol",value:"(10^^100)^(10^100)"},
+{name:"Giggol to the googolplex",value:"(10^^100)^(10^10^100)"},
+{name:"Megafuga-hundred",value:"100^^100"},
+{name:"Hectarillion",value:"Q(1,100)"},
+{name:"Giggolplex (small scale)",value:"10^^101"},
+{name:"Fzgiggol",value:"(10^^100)^(10^^100)"},
+{name:"Giggol Tetrated to Three",value:"(10^^100)^^3"},
+{name:"Grangol",value:"(10^)^100 100"},
+{name:"Googolcentiplex",value:"(10^)^101 100"},
+{name:"Giggolchime",value:"10^^1000"},
+{name:"Giggoltoll",value:"10^^10000"},
+{name:"Giggolgong",value:"10^^100000"},
+{name:"Googolmegaplex",value:"(10^)^1000001 100"},
+{name:"Megarillion",value:"Q(1,1000000)"},
+{name:"Googolgigaplex",value:"(10^)^1000000001 100"},
+{name:"Gigarillion",value:"Q(1,1000000000)"},
+{name:"Googolteraplex",value:"(10^)^1000000000001 100"},
+{name:"Terarillion",value:"Q(1,1000000000000)"},
+{name:"Tritri",value:"3^^^3"},
+{name:"Googolpetaplex",value:"(10^)^(10^15+1) 100"},
+{name:"Petarillion",value:"Q(1,10^15)"},
+{name:"Googolstack",value:"10^^10^100"},
+{name:"Decatriacontaduoekatomyriarillion",value:"Q(1,10^100)"},
+{name:"Googoldex",value:"(10^)^10^100 100"},
+{name:"Trialogialogue",value:"10^^10^^3"},
+{name:"Googolplexidex",value:"(10^)^10^10^100 100"},
+{name:"Megafugagoogolplex",value:"(10^10^100)^^10^10^100"},
+{name:"Tetralogialogue",value:"10^^10^^4"},
+{name:"Googolduplexidex",value:"(10^)^10^10^10^100 100"},
+{name:"Googoltriplexidex",value:"(10^)^10^10^10^10^100 100"},
+{name:"Googolquadriplexidex",value:"(10^)^10^10^10^10^10^100 100"},
+{name:"Googolquintiplexidex",value:"(10^)^10^10^10^10^10^10^100 100"},
+{name:"Tria-Taxis",value:"10^^10^^10"},
+{name:"Giggolplex",value:"10^^10^^100"},
+{name:"Megafuga-giggol",value:"(10^^100)^^(10^^100)"},
+{name:"Grangoldex",value:"10^^10^^101"},
+{name:"Googoldudex",value:"10^^10^^10^100"},
+{name:"Googolplexidudex",value:"10^^10^^10^10^100"},
+{name:"Tetra-Taxis",value:"10^^10^^10^^10"},
+{name:"Giggolduplex",value:"10^^10^^10^^100"},
+{name:"Grangoldudex",value:"10^^10^^10^^101"},
+{name:"Penta-Taxis",value:"10^^10^^10^^10^^10"},
+{name:"Giggoltriplex",value:"10^^10^^10^^10^^100"},
+{name:"Grangoltridex",value:"10^^10^^10^^10^^101"},
+{name:"Hexa-Taxis",value:"10^^10^^10^^10^^10^^10"},
+{name:"Giggolquadriplex",value:"10^^10^^10^^10^^10^^100"},
+{name:"Grangolquadridex",value:"10^^10^^10^^10^^10^^101"},
+{name:"Hepta-Taxis",value:"10^^10^^10^^10^^10^^10^^10"},
+{name:"Giggolquintiplex",value:"10^^10^^10^^10^^10^^10^^100"},
+{name:"Grangolquintidex",value:"10^^10^^10^^10^^10^^10^^101"},
+{name:"Octa-Taxis",value:"10^^10^^10^^10^^10^^10^^10^^10"},
+{name:"Giggolsextiplex",value:"10^^10^^10^^10^^10^^10^^10^^100"},
+{name:"Grangolsextidex",value:"10^^10^^10^^10^^10^^10^^10^^101"},
+{name:"Enna-Taxis",value:"10^^10^^10^^10^^10^^10^^10^^10^^10"},
+{name:"Giggolseptiplex",value:"10^^10^^10^^10^^10^^10^^10^^10^^100"},
+{name:"Grangolseptidex",value:"10^^10^^10^^10^^10^^10^^10^^10^^101"},
+
+// Sub-Ordinal 2.8 — Pentational
+{name:"Deka-Taxis",value:"10^^^10"},
+{name:"Icosa-Taxis",value:"10^^^20"},
+{name:"Penanta-Taxis",value:"10^^^50"},
+{name:"Gaggol",value:"10^^^100"},
+{name:"Greagol",value:"10^^^101"},
+{name:"Googolthrex",value:"10^^^10^100"},
+{name:"Grangoldex",value:"10^^^10^^101"},
+{name:"Grahal",value:"3^^^^3"},
+{name:"Tria-Petaxis",value:"10^^^10^^^10"},
+{name:"Gaggolplex",value:"10^^^10^^^100"},
+{name:"Greagolplex",value:"10^^^10^^^101"},
+{name:"Tritet",value:"4^^^^4"},
+{name:"Tetra-Petaxis",value:"10^^^10^^^10^^^10"},
+{name:"Gaggolduplex",value:"10^^^10^^^10^^^100"},
+{name:"Penta-Petaxis",value:"10^^^10^^^10^^^10^^^10"},
+{name:"Gaggoltriplex",value:"10^^^10^^^10^^^10^^^100"},
+{name:"Hexa-Petaxis",value:"10^^^10^^^10^^^10^^^10^^^10"},
+{name:"Gaggolquadriplex",value:"10^^^10^^^10^^^10^^^10^^^100"},
+{name:"Hepta-Petaxis",value:"10^^^10^^^10^^^10^^^10^^^10^^^10"},
+{name:"Gaggolquintiplex",value:"10^^^10^^^10^^^10^^^10^^^10^^^100"},
+{name:"Octa-Petaxis",value:"10^^^10^^^10^^^10^^^10^^^10^^^10^^^10"},
+{name:"Gaggolsextiplex",value:"10^^^10^^^10^^^10^^^10^^^10^^^10^^^100"},
+{name:"Enna-Petaxis",value:"10^^^10^^^10^^^10^^^10^^^10^^^10^^^10^^^10"},
+{name:"Gaggolseptiplex",value:"10^^^10^^^10^^^10^^^10^^^10^^^10^^^10^^^100"},
+{name:"Deka-Petaxis",value:"10^^^^10"},
+
+  // Sub-Ordinal 2.9 — Hexational
+{name:"Icosa-Petaxis",value:"10^^^^20"},
+{name:"Penanta-Petaxis",value:"10^^^^50"},
+{name:"Geegol",value:"10^^^^100"},
+{name:"Gigangol",value:"10^^^^101"},
+{name:"Tria-Exaxis",value:"10^^^^10^^^^10"},
+{name:"Geegolplex",value:"10^^^^10^^^^100"},
+{name:"Tetra-Exaxis",value:"10^^^^10^^^^10^^^^10"},
+{name:"Geegolduplex",value:"10^^^^10^^^^10^^^^100"},
+{name:"Tripent",value:"5^^^^^5"},
+{name:"Penta-Exaxis",value:"10^^^^10^^^^10^^^^10^^^^10"},
+{name:"Hexa-Exaxis",value:"10^^^^10^^^^10^^^^10^^^^10^^^^10"},
+{name:"Hepta-Exaxis",value:"10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10"},
+{name:"Octa-Exaxis",value:"10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10"},
+{name:"Enna-Exaxis",value:"10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10^^^^10"},
+{name:"Deka-Exaxis",value:"10^^^^^10"},
+{name:"Gigol",value:"10^^^^^100"},
+{name:"Gorgegol",value:"10^^^^^101"},
+{name:"Trihex",value:"6{6}6"},
+{name:"Deka-Eptaxis",value:"10{6}10"},
+{name:"Goggol",value:"10{6}100"},
+{name:"Gulgol",value:"10{6}101"},
+{name:"Trisept",value:"7{7}7"},
+{name:"Deka-Octaxis",value:"10{7}10"},
+{name:"Gagol",value:"10{7}100"},
+{name:"Gaspgol",value:"10{7}101"},
+{name:"Trioct",value:"8{8}8"},
+{name:"Deka-Ennaxis",value:"10{8}10"},
+{name:"Hecta-Ennaxis",value:"10{8}100"},
+{name:"Ginorgol",value:"10{8}101"},
+{name:"Trienn",value:"9{9}9"},
+{name:"Deka-Dekaxis",value:"10{9}10"},
+{name:"Hecta-Dekaxis",value:"10{9}100"},
+{name:"Gargantuul",value:"10{9}101"},
+
+// Sub-Ordinal 2.11
+{name:"Tridecal",value:"10{10}10"},
+{name:"Hecta-endekaxis",value:"10{10}100"},
+{name:"Googoldekex",value:"10{10}10^100"},
+{name:"Googondol",value:"10{10}101"},
+{name:"Trunalum",value:"10{12}11"},
+{name:"Googonkosol",value:"10{20}101"},
+{name:"Googontritol",value:"10{30}101"},
+{name:"Googonpetol",value:"10{50}101"},
+{name:"Boogol",value:"10{100}10"},
+{name:"Hyperon / Megathor",value:"100{100}100"},
+{name:"Gugold",value:"10{100}101"},
+{name:"Boogolchime",value:"10{1,000}10"},
+{name:"Boogoltoll",value:"10{10,000}10"},
+{name:"Boogolgong",value:"10{100,000}10"},
+{name:"Boogolbong",value:"10{100,000,000}10"},
+{name:"Boogolthrong",value:"10{100,000,000,000}10"},
+{name:"Boogolgandingan",value:"10{100,000,000,000,000}10"},
+{name:"Googolsuplex",value:"10{10^100}10"},
+{name:"Grangolsuplex",value:"10{10^^101}10"},
+{name:"Greagolsuplex",value:"10{10^^^101}10"},
+{name:"Gorgegolsuplex",value:"10{10^^^^^101}10"},
+{name:"Tridecalplex",value:"10{10{10}10}10"},
+{name:"Googondolsuplex",value:"10{10{10}101}10"},
+{name:"Boogolplex",value:"10{10{100}10}10"},
+{name:"Gugoldasuplex",value:"10{10{100}101}10"},
+{name:"Tridecalduplex",value:"10{10{10{10}10}10}10"},
+{name:"Boogolduplex",value:"10{10{10{100}10}10}10"},
+{name:"Tridecaltriplex",value:"10{10{10{10{10}10}10}10}10"},
+{name:"Boogoltriplex",value:"10{10{10{10{100}10}10}10}10"},
+{name:"Tridecalquadriplex",value:"10{10{10{10{10{10}10}10}10}10}10"},
+{name:"Little Graham",value:"2{2{2{2{2{2{2{12}3}3}3}3}3}3}3"},
+{name:"Graham’s number",value:"~ {3, 65, 1, 2}"},
+{name:"Xkcd number",value:"{3, 66, 1, 2}"},
+{name:"Graham-Conway number",value:"{4, 65, 1, 2}"},
+{name:"Corporal",value:"{10, 100, 1, 2}"},
+{name:"Graatagold",value:"{10, 101, 1, 2}"},
+{name:"Forcal",value:"{3, 1000001, 1, 2}"},
+{name:"Humongous",value:"LND(10^100)"},
+{name:"Corporalplex",value:"{10, {10, 100, 1, 2}, 1, 2}"},
+{name:"Greegold",value:"{10, 101, 2, 2}"},
+{name:"Grinnggold",value:"{10, 101, 3, 2}"},
+{name:"Golaagold",value:"{10, 101, 4, 2}"},
+{name:"Gruelohgold",value:"{10, 101, 5, 2}"},
+{name:"Gaspgold",value:"{10, 101, 6, 2}"},
+{name:"Ginorgold",value:"{10, 101, 7, 2}"},
+{name:"Grand Tridecal",value:"{10, 10, 10, 2}"},
+{name:"Gugolthra",value:"{100, 101, 99, 2}"},
+{name:"Biggol",value:"{10, 10, 100, 2}"},
+{name:"Great Gugold",value:"{100, 100, {100, 101, 100}, 2}"},
+{name:"Gugolthra-plexitris",value:"{100, 100, {100, 101, 99, 2}, 2}"},
+{name:"Graatagolthra",value:"{10, 101, 1, 3}"},
+{name:"Greegolthra",value:"{10, 101, 2, 3}"},
+{name:"Tetratri",value:"{3, 3, 3, 3}"},
+{name:"Grinningolthra",value:"{10, 101, 3, 3}"},
+{name:"Golaagolthra",value:"{10, 101, 4, 3}"},
+{name:"Gruelohgolthra",value:"{10, 101, 5, 3}"},
+{name:"Gaspgolthra",value:"{10, 101, 6, 3}"},
+{name:"Ginorgolthra",value:"{10, 101, 7, 3}"},
+{name:"Gargantuulthra",value:"{10, 101, 8, 3}"},
+{name:"Googondolthra",value:"{10, 101, 9, 3}"},
+{name:"Gugoltesla",value:"{10, 101, 99, 3}"},
+{name:"Baggol",value:"{10, 10, 100, 3}"},
+{name:"Gugoltesla-plexitris",value:"{10, 10, {10, 100, 99, 3}, 3}"},
+{name:"Graatagoltesla",value:"{100, 101, 1, 4}"},
+{name:"Gugolpeta",value:"{100, 101, 99, 4}"},
+{name:"Throogol",value:"{100, 101, 99, 99}"},
+{name:"Beegol",value:"{10, 10, 100, 4}"},
+{name:"Beegolplex",value:"{10, 10, {10, 10, 100, 4}, 4}"},
+{name:"Bigol",value:"{10, 10, 100, 5}"},
+{name:"Boggol",value:"{10, 10, 100, 6}"},
+{name:"Bagol",value:"{10, 10, 100, 7}"},
+{name:"Begol",value:"{10, 10, 100, 8}"},
+{name:"Bugol",value:"{10, 10, 100, 9}"},
+{name:"Tetradecal / General",value:"{10, 10, 10, 10}"},
+{name:"Troogol",value:"{10, 10, 10, 100}"},
+{name:"Generalplex",value:"{10, 10, 10, {10, 10, 10, 10}}"},
+{name:"Thrangol",value:"{100, 101, 1, 1, 2}"},
+{name:"Threagol",value:"{100, 101, 2, 1, 2}"},
+{name:"Thrugold",value:"{100, 101, 99, 1, 2}"},
+{name:"Thrugolthra",value:"{100, 101, 99, 2, 2}"},
+{name:"Thrugoltesla",value:"{100, 101, 99, 3, 2}"},
+{name:"Triggol",value:"{10, 10, 10, 100, 2}"},
+{name:"Pentatri",value:"{3, 3, 3, 3, 3}"},
+{name:"Traggol",value:"{10, 10, 10, 100, 3}"},
+{name:"Treegol",value:"{10, 10, 10, 100, 4}"},
+{name:"Superpent",value:"{5, 5, 5, 5, 5}"},
+{name:"Trigol",value:"{10, 10, 10, 100, 5}"},
+{name:"Troggol",value:"{10, 10, 10, 100, 6}"},
+{name:"Tragol",value:"{10, 10, 10, 100, 7}"},
+{name:"Pentadecal",value:"{10, 10, 10, 10, 10}"},
+{name:"Tetroogol",value:"{100, 100, 100, 100, 99}"},
+{name:"Quadroogol",value:"{10, 10, 10, 10, 100}"},
+{name:"Pentadecalplex",value:"{10, 10, 10, 10, {10, 10, 10, 10, 10}}"},
+{name:"Tetrangol",value:"{100,101,1,1,1,2}"},
+{name:"Tetrugold",value:"{100,101,99,1,1,2}"},
+{name:"Quadriggol",value:"{10,10,10,10,100,2}"},
+{name:"Quadraggol",value:"{10,10,10,10,100,3}"},
+{name:"Quadreegol",value:"{10,10,10,10,100,4}"},
+{name:"Quadrigol",value:"{10,10,10,10,100,5}"},
+{name:"Quadroggol",value:"{10,10,10,10,100,6}"},
+{name:"Quadragol",value:"{10,10,10,10,100,7}"},
+{name:"Hexadecal",value:"{10,10,10,10,10,10}"},
+{name:"Quintoogol",value:"{10,10,10,10,10,100}"},
+{name:"Pentoogol",value:"{100,100,100,100,100,99}"},
+{name:"Quintiggol",value:"{10,10,10,10,10,100,2}"},
+{name:"Quinteegol",value:"{10,10,10,10,10,100,4}"},
+{name:"Quintigol",value:"{10,10,10,10,10,100,5}"},
+{name:"Supersept",value:"{7,7,7,7,7,7,7}"},
+{name:"Heptadecal",value:"{10,10,10,10,10,10,10}"},
+{name:"Hexoogol",value:"{100,100,100,100,100,100,99}"},
+{name:"Superoct",value:"{8,8,8,8,8,8,8,8}"},
+{name:"Sextoogol",value:"{10,10,10,10,10,10,100}"},
+{name:"Octadecal",value:"{10,10,10,10,10,10,10,10}"},
+{name:"Heptoogol",value:"{100,100,100,100,100,100,100,99}"},
+{name:"Septoogol",value:"{10,10,10,10,10,10,10,100}"},
+{name:"Superenn",value:"{9,9,9,9,9,9,9,9,9}"},
+{name:"Ennadecal",value:"{10,10,10,10,10,10,10,10,10}"},
+{name:"Ogdoogol",value:"{100,100,100,100,100,100,100,100,99}"},
+{name:"Octoogol",value:"{10,10,10,10,10,10,10,10,100}"},
+{name:"Iteral",value:"{10, 10 [2] 2}"},
+{name:"Decoogol",value:"{10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 100}"},
+{name:"Ultatri",value:"{3, 27 [2] 2}"},
+{name:"Goobolspeck",value:"{10, 90 [2] 2}"},
+{name:"Goobolcrumb",value:"{10, 95 [2] 2}"},
+{name:"Goobolchunk",value:"{10, 99 [2] 2}"},
+{name:"Goobol",value:"{10, 100 [2] 2}"},
+{name:"Godgahlah",value:"{100, 101 [2] 2}"},
+{name:"Goobolswarm",value:"{10, 110 [2] 2}"},
+{name:"Goobolding",value:"{10, 500 [2] 2}"},
+{name:"Goobolchime",value:"{10, 1000 [2] 2}"},
+{name:"Goobolbell",value:"{10, 5000 [2] 2}"},
+{name:"Gooboltoll",value:"{10, 10000 [2] 2}"},
+{name:"Goobolgong",value:"{10, 100000 [2] 2}"},
+{name:"Godgahlahgong",value:"{100000, 100001 [2] 2}"},
+{name:"Goobolbong",value:"{10, 100000000 [2] 2}"},
+{name:"Goobolthrong",value:"{10, 100000000000 [2] 2}"},
+{name:"Goobolgandigan",value:"{10, 10^14 [2] 2}"},
+{name:"Googahlah",value:"{100, 10^100 [2] 2}"},
+{name:"Duperdecal",value:"{10, {10, 10 [2] 2} [2] 2}"},
+{name:"Goobolplex",value:"{10, {10, 100 [2] 2} [2] 2}"},
+{name:"Goobolduplex",value:"{10, {10, {10, 100 [2] 2} [2] 2} [2] 2}"},
+{name:"Grand godgahlah",value:"{100, 3, 2 [2] 2}"},
+{name:"Truperdecal",value:"{10, {10, {10, 10 [2] 2} [2] 2} [2] 2}"},
+{name:"Grand grand godgahlah",value:"{100, 4, 2 [2] 2}"},
+{name:"Quadruperdecal",value:"{10, {10, {10, {10, 10 [2] 2} [2] 2} [2] 2} [2] 2}"},
+{name:"Grand grand grand godgahlah",value:"{100, 5, 2 [2] 2}"},
+{name:"Quintuperdecal",value:"{10, 6, 2 [2] 2}"},
+{name:"Four-ex-grand godgahlah",value:"{100, 6, 2 [2] 2}"},
+{name:"Sextuperdecal",value:"{10, 7, 2 [2] 2}"},
+{name:"Five-ex-grand godgahlah",value:"{100, 7, 2 [2] 2}"},
+{name:"Septuperdecal",value:"{10, 8, 2 [2] 2}"},
+{name:"Six-ex-grand godgahlah",value:"{100, 8, 2 [2] 2}"},
+{name:"Octuperdecal",value:"{10, 9, 2 [2] 2}"},
+{name:"Seven-ex-grand godgahlah",value:"{100, 9, 2 [2] 2}"},
+{name:"Gibbol",value:"{10, 100, 2 [2] 2}"},
+{name:"Grandgahlah",value:"{100, 100, 2 [2] 2}"},
+{name:"Hundred-ex-grand godgahlah",value:"{100, 101, 2 [2] 2}"},
+{name:"11,862-ex-grand godgahlahgong",value:"{100000, 11863, 2 [2] 2}"},
+{name:"Gabbol",value:"{10, 100, 3 [2] 2}"},
+{name:"Greagahlah",value:"{100, 100, 3 [2] 2}"},
+{name:"Geebol",value:"{10, 100, 4 [2] 2}"},
+{name:"Gigangahlah",value:"{100, 100, 4 [2] 2}"},
+{name:"Gibol",value:"{10, 100, 5 [2] 2}"},
+{name:"Gorgegahlah",value:"{100, 100, 5 [2] 2}"},
+{name:"Gobbol",value:"{10, 100, 6 [2] 2}"},
+{name:"Gulgahlah",value:"{100, 100, 6 [2] 2}"},
+{name:"Gabol",value:"{10, 100, 7 [2] 2}"},
+{name:"Gaspgahlah",value:"{100, 100, 7 [2] 2}"},
+{name:"Ginorgahlah",value:"{100, 100, 8 [2] 2}"},
+{name:"Gargangahlah",value:"{100, 100, 9 [2] 2}"},
+{name:"Googongahlah",value:"{100, 100, 10 [2] 2}"},
+{name:"Boobol",value:"{10, 10, 100 [2] 2}"},
+{name:"Gugoldgahlah",value:"{100, 100, 100 [2] 2}"},
+{name:"Graatagoldgahlah",value:"{100, 100, 1, 2 [2] 2}"},
+{name:"Greegoldgahlah",value:"{100, 100, 2, 2 [2] 2}"},
+{name:"Grinningoldgahlah",value:"{100, 100, 3, 2 [2] 2}"},
+{name:"Golaagoldgahlah",value:"{100, 100, 4, 2 [2] 2}"},
+{name:"Bibbol",value:"{10, 10, 100, 2 [2] 2}"},
+{name:"Babbol",value:"{10, 10, 100, 3 [2] 2}"},
+{name:"Beebol",value:"{10, 10, 100, 4 [2] 2}"},
+{name:"Bibol",value:"{10, 10, 100, 5 [2] 2}"},
+{name:"Bobbol",value:"{10, 10, 100, 6 [2] 2}"},
+{name:"Babol",value:"{10, 10, 100, 7 [2] 2}"},
+{name:"Troobol",value:"{10, 10, 10, 100 [2] 2}"},
+{name:"Tribbol",value:"{10, 10, 10, 100, 2 [2] 2}"},
+{name:"Trabbol",value:"{10, 10, 10, 100, 3 [2] 2}"},
+{name:"Treebol",value:"{10, 10, 10, 100, 4 [2] 2}"},
+{name:"Tribol",value:"{10, 10, 10, 100, 5 [2] 2}"},
+{name:"Trobbol",value:"{10, 10, 10, 100, 6 [2] 2}"},
+{name:"Trabol",value:"{10, 10, 10, 100, 7 [2] 2}"},
+{name:"Quadroobol",value:"{10, 10, 10, 10, 100 [2] 2}"},
+{name:"Quadribbol",value:"{10, 10, 10, 10, 100, 2 [2] 2}"},
+{name:"Quadrabbol",value:"{10, 10, 10, 10, 100, 3 [2] 2}"},
+{name:"Quadreebol",value:"{10, 10, 10, 10, 100, 4 [2] 2}"},
+{name:"Quadribol",value:"{10, 10, 10, 10, 100, 5 [2] 2}"},
+{name:"Quadrobbol",value:"{10, 10, 10, 10, 100, 6 [2] 2}"},
+{name:"Quadrabol",value:"{10, 10, 10, 10, 100, 7 [2] 2}"},
+{name:"Quintoobol",value:"{10, 10, 10, 10, 10, 100 [2] 2}"},
+{name:"Quintibbol",value:"{10, 10, 10, 10, 10, 100, 2 [2] 2}"},
+{name:"Quintabbol",value:"{10, 10, 10, 10, 10, 100, 3 [2] 2}"},
+{name:"Quinteebol",value:"{10, 10, 10, 10, 10, 100, 4 [2] 2}"},
+{name:"Quintibol",value:"{10, 10, 10, 10, 10, 100, 5 [2] 2}"},
+{name:"Quintobbol",value:"{10, 10, 10, 10, 10, 100, 6 [2] 2}"},
+{name:"Quintabol",value:"{10, 10, 10, 10, 10, 100, 7 [2] 2}"},
+{name:"Sextoobol",value:"{10, 10, 10, 10, 10, 10, 100 [2] 2}"},
+{name:"Gootrol",value:"{10, 100 [2] 3}"},
+{name:"Gitrol",value:"{10, 100, 2 [2] 3}"},
+{name:"Gatrol",value:"{10, 100, 3 [2] 3}"},
+{name:"Geetrol",value:"{10, 100, 4 [2] 3}"},
+{name:"Gietrol",value:"{10, 100, 5 [2] 3}"},
+{name:"Gotrol",value:"{10, 100, 6 [2] 3}"},
+{name:"Gaitrol",value:"{10, 100, 7 [2] 3}"},
+{name:"Bootrol",value:"{10, 10, 100 [2] 3}"},
+{name:"Trootrol",value:"{10, 10, 10, 100 [2] 3}"},
+{name:"Quadrootrol",value:"{10, 10, 10, 10, 100 [2] 3}"},
+{name:"Quintootrol",value:"{10, 10, 10, 10, 10, 100 [2] 3}"},
+{name:"Gooquadrol",value:"{10, 100 [2] 4}"},
+{name:"Giquadrol",value:"{10, 100, 2 [2] 4}"},
+{name:"Booquadrol",value:"{10, 10, 100 [2] 4}"},
+{name:"Trooquadrol",value:"{10, 10, 10, 100 [2] 4}"},
+{name:"Quadrooquadrol",value:"{10, 10, 10, 10, 100 [2] 4}"},
+{name:"Quintooquadrol",value:"{10, 10, 10, 10, 10, 100 [2] 4}"},
+{name:"Gooquintol",value:"{10, 100 [2] 5}"},
+{name:"Booquintol",value:"{10, 10, 100 [2] 5}"},
+{name:"Goosextol",value:"{10, 100 [2] 6}"},
+{name:"Boosextol",value:"{10, 10, 100 [2] 6}"},
+{name:"Gooseptol",value:"{10, 100 [2] 7}"},
+{name:"Goooctol",value:"{10, 100 [2] 8}"},
+{name:"Goononol",value:"{10, 100 [2] 9}"},
+{name:"Emperal",value:"{10, 10 [2] 10}"},
+{name:"Gossol",value:"{10, 10 [2] 100}"},
+{name:"Emperalplex",value:"{10, 10 [2] {10, 10 [2] 10}}"},
+{name:"Gossolplex",value:"{10, 10 [2] {10, 10 [2] 100}}"},
+{name:"Gissol",value:"{10, 10 [2] 100, 2}"},
+{name:"Gassol",value:"{10, 10 [2] 100, 3}"},
+{name:"Geesol",value:"{10, 10 [2] 100, 4}"},
+{name:"Gussol",value:"{10, 10 [2] 100, 5}"},
+{name:"Hyperal",value:"{10, 10 [2] 10, 10}"},
+{name:"Mossol",value:"{10, 10 [2] 10, 100}"},
+{name:"Missol",value:"{10, 10 [2] 10, 100, 2}"},
+{name:"Massol",value:"{10, 10 [2] 10, 100, 3}"},
+{name:"Meesol",value:"{10, 10 [2] 10, 100, 4}"},
+{name:"Mussol",value:"{10, 10 [2] 10, 100, 5}"},
+{name:"Bossol",value:"{10, 10 [2] 10, 10, 100}"},
+{name:"Bissol",value:"{10, 10 [2] 10, 10, 100, 2}"},
+{name:"Bassol",value:"{10, 10 [2] 10, 10, 100, 3}"},
+{name:"Beesol",value:"{10, 10 [2] 10, 10, 100, 4}"},
+{name:"Bussol",value:"{10, 10 [2] 10, 10, 100, 5}"},
+{name:"Trossol",value:"{10, 10 [2] 10, 10, 10, 100}"},
+{name:"Trissol",value:"{10, 10 [2] 10, 10, 10, 100, 2}"},
+{name:"Trassol",value:"{10, 10 [2] 10, 10, 10, 100, 3}"},
+{name:"Treesol",value:"{10, 10 [2] 10, 10, 10, 100, 4}"},
+{name:"Trussol",value:"{10, 10 [2] 10, 10, 10, 100, 5}"},
+{name:"Quadrossol",value:"{10, 10 [2] 10, 10, 10, 10, 100}"},
+{name:"Quintossol",value:"{10, 10 [2] 10, 10, 10, 10, 10, 100}"},
+{name:"Sextossol",value:"{10, 10 [2] 10, 10, 10, 10, 10, 10, 100}"},
+{name:"Diteral",value:"{10, 10 [2] 1 [2] 2}"},
+{name:"Dubol",value:"{10, 100 [2] 1 [2] 2}"},
+{name:"Dutrol",value:"{10, 100 [2] 1 [2] 3}"},
+{name:"Duquadrol",value:"{10, 100 [2] 1 [2] 4}"},
+{name:"Admiral",value:"{10, 100 [2] 1 [2] 10}"},
+{name:"Dossol",value:"{10, 100 [2] 1 [2] 100}"},
+{name:"Dutritri",value:"{3, 3 [3] 2}"},
+{name:"Dutridecal",value:"{10, 3 [3] 2}"},
+{name:"Triteral",value:"{10, 10 [2] 1 [2] 1 [2] 2}"},
+{name:"Triubol",value:"{10, 100 [2] 1 [2] 1 [2] 2}"},
+{name:"Tetrubol",value:"{10, 100 [2] 1 [2] 1 [2] 1 [2] 2}"},
+{name:"Pentubol",value:"{10, 100 [2] 1 [2] 1 [2] 1 [2] 1 [2] 2}"},
+{name:"Sextubol",value:"{10, 100 [2] 1 [2] 1 [2] 1 [2] 1 [2] 1 [2] 2}"},
+{name:"Xappol",value:"{10, 10 [3] 2}"},
+{name:"Isosto-godgahlah",value:"{100, 20 [3] 2}"},
+{name:"Trianto-godgahlah",value:"{100, 30 [3] 2}"},
+{name:"Goxxol",value:"{10, 100 [3] 2}"},
+{name:"Gridgahlah",value:"{100, 100 [3] 2}"},
+{name:"Xappolplex",value:"{10, 3, 2 [3] 2}"},
+{name:"Grand Xappol",value:"{10, 10 [3] 3}"},
+{name:"Dimentri",value:"{3, 3 [4] 2}"},
+{name:"Colossol",value:"{10, 10 [4] 2}"},
+{name:"Coloxxol",value:"{10, 100 [4] 2}"},
+{name:"Kubikahlah",value:"{100, 100 [4] 2}"},
+{name:"Colossolplex",value:"{10, 3, 2 [4] 2}"},
+{name:"Terossol",value:"{10, 10 [5] 2}"},
+{name:"Teroxxol",value:"{10, 100 [5] 2}"},
+{name:"Quarticahlah",value:"{100, 100 [5] 2}"},
+{name:"Terossolplex",value:"{10, 3, 2 [5] 2}"},
+{name:"Petossol",value:"{10, 10 [6] 2}"},
+{name:"Petoxxol",value:"{10, 100 [6] 2}"},
+{name:"Petossolplex",value:"{10, 3, 2 [6] 2}"},
+{name:"Ectossol",value:"{10, 10 [7] 2}"},
+{name:"Ectoxxol",value:"{10, 100 [7] 2}"},
+{name:"Ectossolplex",value:"{10, 3, 2 [7] 2}"},
+{name:"Zettossol",value:"{10, 10 [8] 2}"},
+{name:"Zettoxxol",value:"{10, 100 [8] 2}"},
+{name:"Zettossolplex",value:"{10, 3, 2 [8] 2}"},
+{name:"Yottossol",value:"{10, 10 [9] 2}"},
+{name:"Yottoxxol",value:"{10, 100 [9] 2}"},
+{name:"Yottossolplex",value:"{10, 3, 2 [9] 2}"},
+{name:"Xennossol / Ronnossol",value:"{10, 10 [10] 2}"},
+{name:"Xennoxxol / Ronnoxxol",value:"{10, 100 [10] 2}"},
+{name:"Xennossolplex / Ronnossolplex",value:"{10, 3, 2 [10] 2}"},
+
+{name:"Dimendecal",value:"{10, 10 [11] 2}"},
+{name:"Dimendoxxol",value:"{10, 100 [11] 2}"},
+{name:"Cosmal",value:"{10, 11 [1, 2] 10}"},
+{name:"Hyper cosmal",value:"{10, 10 [11] 10, 10}"},
+{name:"Admire cosmal",value:"{10, 10 [11] 1 [11] 10}"},
+{name:"Killanossol",value:"{10, 12 [1, 2] 2}"},
+{name:"Meganossol",value:"{10, 13 [1, 2] 2}"},
+{name:"Giganossol",value:"{10, 14 [1, 2] 2}"},
+{name:"Teranossol",value:"{10, 15 [1, 2] 2}"},
+{name:"Petanossol",value:"{10, 16 [1, 2] 2}"},
+{name:"Exanossol",value:"{10, 17 [1, 2] 2}"},
+{name:"Vamossol",value:"{10, 21 [1, 2] 2}"},
+{name:"Gongulus",value:"{10, 100 [1, 2] 2}"},
+{name:"Second gongulus",value:"{10, 100 [101] 2}"},
+{name:"Godgathor",value:"{100, 100 [101] 2}"},
+{name:"Legendary Explosive Edamame Taco",value:"{1337, 1337 [1338] 1337}"},
+{name:"Hecato-godgathor",value:"{100, 100 [2, 2] 2}"},
+{name:"Godgridgathor",value:"{100, 100 [3, 2] 2}"},
+{name:"Gingulus",value:"{10, 100 [1, 3] 2}"},
+{name:"Godgathordeus",value:"{100, 100 [101, 2] 2}"},
+{name:"Trilatri",value:"{3, 3 [1, 4] 2}"},
+{name:"Trilatet",value:"{4, 4 [1, 4] 2}"},
+{name:"Gangulus",value:"{10, 100 [1, 4] 2}"},
+{name:"Godgathortruce",value:"{100, 100 [101, 3] 2}"},
+{name:"Geengulus",value:"{10, 100 [1, 5] 2}"},
+{name:"Godgathorquad",value:"{100, 100 [1, 5] 2}"},
+{name:"Gowngulus",value:"{10, 100 [1, 6] 2}"},
+{name:"Godgathorquid",value:"{100, 100 [1, 6] 2}"},
+{name:"Gungulus",value:"{10, 100 [1, 7] 2}"},
+{name:"Godgathorsid",value:"{100, 100 [1, 7] 2}"},
+{name:"Gagulus",value:"{10, 100 [1, 8] 2}"},
+{name:"Godgathorseptuce",value:"{100, 100 [1, 8] 2}"},
+{name:"Gyngulus",value:"{10, 100 [1, 9] 2}"},
+{name:"Godgathoroctuce",value:"{100, 100 [1, 9] 2}"},
+{name:"Godgathornonice",value:"{100, 100 [1, 10] 2}"},
+{name:"Godgathordecice",value:"{100, 100 [1, 11] 2}"},
+{name:"Omnimal",value:"{10, 10 [11, 11] 10, 10}"},
+{name:"Omnifical",value:"{10, 10 [11, 11] 1 [11, 11] 10, 10}"},
+{name:"Godgathorvigintice",value:"{100, 100 [1, 21] 2}"},
+{name:"Godgathortrigintice",value:"{100, 100 [1, 31] 2}"},
+{name:"Godgathorquadragintice",value:"{100, 100 [1, 41] 2}"},
+{name:"Godgathorquinquagintice",value:"{100, 100 [1, 51] 2}"},
+
+{name:"Bongulus",value:"{10, 100 [1, 1, 2] 2}"},
+{name:"Gralgathor",value:"{100, 100 [1, 1, 2] 2}"},
+{name:"Graltrigathor",value:"{100, 100 [1, 1, 2] 3}"},
+{name:"Graltergathor",value:"{100, 100 [1, 1, 2] 4}"},
+{name:"Bingulus",value:"{10, 100 [1, 1, 3] 2}"},
+{name:"Gralgathordeus",value:"{100, 100 [1, 1, 3] 2}"},
+{name:"Bangulus",value:"{10, 100 [1, 1, 4] 2}"},
+{name:"Gralgathortruce",value:"{100, 100 [1, 1, 4] 2}"},
+{name:"Beengulus",value:"{10, 100 [1, 1, 5] 2}"},
+{name:"Gralgathorquad",value:"{100, 100 [1, 1, 5] 2}"},
+{name:"Bowngulus",value:"{10, 100 [1, 1, 6] 2}"},
+{name:"Gralgathorquid",value:"{100, 100 [1, 1, 6] 2}"},
+{name:"Bungulus",value:"{10, 100 [1, 1, 7] 2}"},
+{name:"Gralgathorsid",value:"{100, 100 [1, 1, 7] 2}"},
+{name:"Bagulus",value:"{10, 100 [1, 1, 8] 2}"},
+{name:"Gralgathorseptuce",value:"{100, 100 [1, 1, 8] 2}"},
+{name:"Byngulus",value:"{10, 100 [1, 1, 9] 2}"},
+{name:"Gralgathoroctuce",value:"{100, 100 [1, 1, 9] 2}"},
+{name:"Gralgathornonice",value:"{100, 100 [1, 1, 10] 2}"},
+{name:"Gralgathordecice",value:"{100, 100 [1, 1, 11] 2}"},
+{name:"Gralgathorvigintice",value:"{100, 100 [1, 1, 21] 2}"},
+{name:"Gralgathorquinquagintice",value:"{100, 100 [1, 1, 51] 2}"},
+
+{name:"Trongulus",value:"{10, 100 [1, 1, 1, 2] 2}"},
+{name:"Thraelgathor",value:"{100, 100 [1, 1, 1, 2] 2}"},
+{name:"Tringulus",value:"{10, 100 [1, 1, 1, 3] 2}"},
+{name:"Thraelgathordeus",value:"{100, 100 [1, 1, 1, 3] 2}"},
+{name:"Trangulus",value:"{10, 100 [1, 1, 1, 4] 2}"},
+{name:"Thraelgathortruce",value:"{100, 100 [1, 1, 1, 4] 2}"},
+{name:"Treengulus",value:"{10, 100 [1, 1, 1, 5] 2}"},
+{name:"Thraelgathorquad",value:"{100, 100 [1, 1, 1, 5] 2}"},
+{name:"Trowngulus",value:"{10, 100 [1, 1, 1, 6] 2}"},
+{name:"Thraelgathorquid",value:"{100, 100 [1, 1, 1, 6] 2}"},
+{name:"Trungulus",value:"{10, 100 [1, 1, 1, 7] 2}"},
+{name:"Thraelgathorsid",value:"{100, 100 [1, 1, 1, 7] 2}"},
+{name:"Tragulus",value:"{10, 100 [1, 1, 1, 8] 2}"},
+{name:"Thraelgathorseptuce",value:"{100, 100 [1, 1, 1, 8] 2}"},
+{name:"Tryngulus",value:"{10, 100 [1, 1, 1, 9] 2}"},
+{name:"Thraelgathoroctuce",value:"{100, 100 [1, 1, 1, 9] 2}"},
+{name:"Thraelgathornonice",value:"{100, 100 [1, 1, 1, 10] 2}"},
+{name:"Thraelgathordecice",value:"{100, 100 [1, 1, 1, 11] 2}"},
+{name:"Thraelgathorvigintice",value:"{100, 100 [1, 1, 1, 21] 2}"},
+{name:"Quadrongulus",value:"{10, 100 [1, 1, 1, 1, 2] 2}"},
+{name:"Terinngathor",value:"{100, 100 [1, 1, 1, 1, 2] 2}"},
+{name:"Quintongulus",value:"{10, 100 [1, 1, 1, 1, 1, 2] 2}"},
+{name:"Pentaelgathor",value:"{100, 100 [1, 1, 1, 1, 1, 2] 2}"},
+{name:"Sextongulus",value:"{10, 100 [1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Hexaelgathor",value:"{100, 100 [1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Septongulus",value:"{10, 100 [1, 1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Heptaelgathor",value:"{100, 100 [1, 1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Octongulus",value:"{10, 100 [1, 1, 1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Octaelgathor",value:"{100, 100 [1, 1, 1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Ennaelgathor",value:"{100, 100 [1, 1, 1, 1, 1, 1, 1, 1, 1, 2] 2}"},
+{name:"Quadritetrom",value:"{10, 10 [1 [2] 2] 2}"},
+{name:"Dekaelgathor",value:"{100, 10 [1 [2] 2] 2}"},
+{name:"Endekaelgathor",value:"{100, 11 [1 [2] 2] 2}"},
+{name:"Dodekaelgathor",value:"{100, 12 [1 [2] 2] 2}"},
+{name:"Triadekaelgathor",value:"{100, 13 [1 [2] 2] 2}"},
+{name:"Tetradekaelgathor",value:"{100, 14 [1 [2] 2] 2}"},
+{name:"Pentadekaelgathor",value:"{100, 15 [1 [2] 2] 2}"},
+{name:"Hexadekaelgathor",value:"{100, 16 [1 [2] 2] 2}"},
+{name:"Heptadekaelgathor",value:"{100, 17 [1 [2] 2] 2}"},
+{name:"Octadekaelgathor",value:"{100, 18 [1 [2] 2] 2}"},
+{name:"Ennadekaelgathor",value:"{100, 19 [1 [2] 2] 2}"},
+{name:"Icosiaelgathor",value:"{100, 20 [1 [2] 2] 2}"},
+{name:"Triantaelgathor",value:"{100, 30 [1 [2] 2] 2}"},
+{name:"Sarantaelgathor",value:"{100, 40 [1 [2] 2] 2}"},
+{name:"Penintaelgathor",value:"{100, 50 [1 [2] 2] 2}"},
+{name:"Exintaelgathor",value:"{100, 60 [1 [2] 2] 2}"},
+{name:"Ebdomintaelgathor",value:"{100, 70 [1 [2] 2] 2}"},
+{name:"Ogdontaelgathor",value:"{100, 80 [1 [2] 2] 2}"},
+{name:"Enenintaelgathor",value:"{100, 90 [1 [2] 2] 2}"},
+{name:"Goplexulus",value:"{10, 100 [1 [2] 2] 2}"},
+{name:"Godtothol",value:"{100, 100 [1 [2] 2] 2}"},
+{name:"Grangol-carta-godtothol",value:"{10, 100, 2 [1 [2] 2] 2}"},
+{name:"Godgahlah-carta-godtothol",value:"{10, 100 [2] 2 [1 [2] 2] 2}"},
+{name:"Hyper-godgathorfact",value:"{10, 100 [1 [2] 1, 2] 2}"},
+{name:"Deutero-hyper-godgathorfact",value:"{10, 100 [1 [2] 1, 2] 1 [1 [2] 1, 2] 2}"},
+{name:"Hyper-deutero-godgathorfact",value:"{10, 100 [1 [2] 1, 3] 2}"},
+{name:"Hyper-gridgathor",value:"{10, 100 [1 [2] 1, 1, 2] 2}"},
+{name:"Hyper-godkubikgathor",value:"{10, 100 [1 [2] 1, 1, 1, 2] 2}"},
+{name:"Hyper-godquadrtricgathor",value:"{10, 100 [1 [2] 1, 1, 1, 1, 2] 2}"},
+{name:"Hyper-godgathordeus",value:"{100, 100 [1 [2] 1 [2] 2] 2}"},
+{name:"Graltothol",value:"{100, 100 [1 [3] 2] 2}"},
+{name:"Thraeltothol",value:"{100, 100 [1 [4] 2] 2}"},
+{name:"Terinntothol",value:"{100, 100 [1 [5] 2] 2}"},
+{name:"Pentaeltothol",value:"{100, 100 [1 [6] 2] 2}"},
+{name:"Hexaeltothol",value:"{100, 100 [1 [7] 2] 2}"},
+{name:"Heptaeltothol",value:"{100, 100 [1 [8] 2] 2}"},
+{name:"Octaeltothol",value:"{100, 100 [1 [9] 2] 2}"},
+{name:"Ennaeltothol",value:"{100, 100 [1 [10] 2] 2}"},
+{name:"Dekaeltothol",value:"{100, 100 [1 [11] 2] 2}"},
+{name:"Goduplexulus",value:"{10, 100 [1 [1, 2] 2] 2}"},
+{name:"Godtertol",value:"{100, 100 [1 [1, 2] 2] 2}"},
+{name:"Quintitetrom",value:"{10, 10 [1 [1, 2] 2] 2}"},
+{name:"Graltertol",value:"{100, 100 [1 [1, 1, 2] 2] 2}"},
+{name:"Thraeltertol",value:"{100, 100 [1 [1, 1, 1, 2] 2] 2}"},
+{name:"Terinntertol",value:"{100, 100 [1 [1, 1, 1, 1, 2] 2] 2}"},
+{name:"Pentaeltertol",value:"{100, 100 [1 [1, 1, 1, 1, 1, 2] 2] 2}"},
+{name:"Gotriplexulus",value:"{10, 100 [1 [1 [2] 2] 2] 2}"},
+{name:"Godtopol",value:"{100, 100 [1 [1 [2] 2] 2] 2}"},
+{name:"Sextitetrom",value:"{10, 10 [1 [1 [2] 2] 2] 2}"},
+{name:"Goquadruplexulus",value:"{10, 100 [1 [1 [1, 2] 2] 2] 2}"},
+{name:"Godhathor",value:"{100, 100 [1 [1 [1, 2] 2] 2] 2}"},
+{name:"Septitetrom",value:"{10, 10 [1 [1 [1, 2] 2] 2] 2}"},
+{name:"Goquintiplexulus",value:"{10, 100 [1 [1 [1 [2] 2] 2] 2] 2}"},
+{name:"Godheptol",value:"{100, 100 [1 [1 [1 [2] 2] 2] 2] 2}"},
+{name:"Octitetrom",value:"{10, 10 [1 [1 [1 [2] 2] 2] 2] 2}"},
+{name:"Gosextiplexulus",value:"{10, 100 [1 [1 [1 [1, 2] 2] 2] 2] 2}"},
+{name:"Godoctol",value:"{100, 100 [1 [1 [1 [1, 2] 2] 2] 2] 2}"},
+{name:"Nonitetrom",value:"{10, 10 [1 [1 [1 [1, 2] 2] 2] 2] 2}"},
+{name:"Goseptiplexulus",value:"{10, 100 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
+{name:"GodentalGodentoalGodentol",value:"{100, 100 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
+{name:"Dekotetrom",value:"{10, 10 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
+{name:"Gooctiplexulus",value:"{10, 100 [1 [1 [1 [1 [1, 2] 2] 2] 2] 2] 2}"},
+{name:"Goddekathol",value:"{100, 100 [1 [1 [1 [1 [1, 2] 2] 2] 2] 2] 2}"},
+{name:"Gononiplexulus",value:"{10, 100 [1 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
+{name:"Godendekathol",value:"{100, 100 [1 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2] 2}"},
+{name:"Goddodekathol",value:"{100, 100 [1 [1 [1 [1 [1 [1, 2] 2] 2] 2] 2] 2] 2}"},
+{name:"Godtriadekathol",value:"{100, 100 [1 [1 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2] 2}"},
+{name:"Hektotetrom",value:"{10, 49 [1 / 2] 2}"},
+{name:"Tethrathoth",value:"{100, 49 [1 / 2] 2}"},
+{name:"Goppatoth",value:"{10, 51 [1 / 2] 2}"},
+{name:"Grand tethrathoth",value:"{100, {100, 49 [1 / 2] 2} [1 / 2] 2}"},
+{name:"Grand grand tethrathoth",value:"{100, {100, {100, 49 [1 / 2] 2} [1 / 2] 2} [1 / 2] 2}"},
+{name:"Grand grand grand tethrathoth",value:"{100, {100, {100, {100, 49 [1 / 2] 2} [1 / 2] 2} [1 / 2] 2} [1 / 2] 2}"},
+{name:"Grand grand grand grand tethrathoth",value:"{100, {100, {100, {100, {100, 49 [1 / 2] 2} [1 / 2] 2} [1 / 2] 2} [1 / 2] 2} [1 / 2] 2}"},
+{name:"Five-ex-grand tethrathoth",value:"{100, 7, 2 [1 / 2] 2}"},
+{name:"Flan number 3",value:"{6, 8, 2 [1 / 2] 2}"},
+{name:"Six-ex-grand tethrathoth",value:"{100, 8, 2 [1 / 2] 2}"},
+{name:"Ten-ex-grand tethrathoth",value:"{100, 12, 2 [1 / 2] 2}"},
+{name:"Fish number 5",value:"{63, 63, 2 [1 / 2] 2}"},
+{name:"Grantethrathoth",value:"{100, 101, 2 [1 / 2] 2}"},
+{name:"Googol-ex-grand tethrathoth",value:"{100, 10^100 + 2, 2 [1 / 2] 2}"},
+{name:"Tethrathoth-ex-grand tethrathoth",value:"{100, {100, 49 [1 / 2] 2} + 2, 2 [1 / 2] 2}"},
+{name:"Tethrathoth-ex-grand tethrathoth-ex-grand tethrathoth",value:"{100, {100, {100, 49 [1 / 2] 2} + 2, 2 [1 / 2] 2} + 2, 2 [1 / 2] 2}"},
+{name:"Gorgetethrathoth",value:"{100, 100, 5 [1 / 2] 2}"},
+{name:"Gugold-carta-tethrathoth",value:"{100, 100, 100 [1 / 2] 2}"},
+{name:"Grinningold-carta-tethrathoth",value:"{100, 100, 3, 2 [1 / 2] 2}"},
+{name:"Throotrigol-carta-tethrathoth",value:"{100, 100, 99, 99, 2 [1 / 2] 2}"},
+{name:"Bultep",value:"{10, 10 [1 / 2] 3}"},
+{name:"Tethratrithoth",value:"{100, 100 [1 / 2] 3}"},
+{name:"Tethraterthoth",value:"{100, 100 [1 / 2] 4}"},
+{name:"Tethrathoth-by-hyperion",value:"{100, 100 [1 / 2] 1, 2}"},
+{name:"Deutero-tethrathoth",value:"{100, 100 [1 / 2] 1 [1 / 2] 2}"},
+{name:"Tethtrafact",value:"{100, 100 [2 / 2] 2}"},
+{name:"Grideutertethrathoth",value:"{100, 100 [3 / 2] 2}"},
+{name:"Kubicutethrathoth",value:"{100, 100 [4 / 2] 2}"},
+{name:"Quarticutethrathoth",value:"{100, 100 [5 / 2] 2}"},
+{name:"Tethragodgathor",value:"{100, 100 [1, 2 /2] 2}"},
+{name:"Tethragralgathor",value:"{100, 100 [1, 1, 2 / 2] 2}"},
+{name:"Tethrathraelgathor",value:"{100, 100 [1, 1, 1, 2 / 2] 2}"},
+{name:"Tethragodtothol",value:"{100, 100 [1 [2] 2 / 2] 2}"},
+{name:"Tethragodtertol",value:"{100, 100 [1 [1, 2] 2 / 2] 2}"},
+{name:"Tethragodtopol",value:"{100, 100 [1 [1 [2] 2] 2 / 2] 2}"},
+{name:"Tethraduliath",value:"{100, 50 [1 [1 / 2] 2 / 2] 2}"},
+{name:"Tethra-ocliath",value:"{100, 50 [1 [1 / 2] 8 / 2] 2}"},
+{name:"Monster-Giant",value:"{100, 100 [1 [1 / 2] 1, 2 / 2] 2}"},
+{name:"Monster-Hecateract",value:"{100, 100 [1 [1 / 2] 1 [2] 2 / 2] 2}"},
+{name:"Tethrathoth-tripletetrate",value:"{100, 100 [1 [1 / 2] 1 [1 / 2] 2 / 2] 2}"},
+{name:"Super-Monster-Giant",value:"{100, 100 [1 [2 / 2] 2 / 2] 2}"},
+{name:"Super-Monster-Hecateract",value:"{100, 100 [1 [1, 2 / 2] 2 / 2] 2}"},
+{name:"Tethrathoth-quadrupletetrate",value:"{100, 100 [1 [1 [1 / 2] 2 / 2] 2 / 2] 2}"},
+{name:"Terrible tethrathoth",value:"{100, 51 [1 / 3] 2}"},
+{name:"Terrible terrible tethrathoth",value:"{100, 100 [1 / 4] 2}"},
+{name:"Triple-terrible tethrathoth",value:"{100, 100 [1 / 5] 2}"},
+{name:"Quadruple-terrible tethrathoth",value:"{100, 100 [1 / 6] 2}"},
+{name:"Quintuple-terrible tethrathoth",value:"{100, 100 [1 / 7] 2}"},
+{name:"Nonuple-terrible tethrathoth",value:"{100, 100 [1 / 11] 2}"},
+{name:"Tethriterator / Tethrathoth ba’al",value:"{100, 100 [1 / 1, 2] 2}"},
+{name:"Tethriterfact",value:"{100, 100 [2 / 1, 2] 2}"},
+{name:"Terrible-tethriterator",value:"{100, 100 [1 / 2, 2] 2}"},
+{name:"Double-terrible-tethriterator",value:"{100, 100 [1 / 3, 2] 2}"},
+{name:"Triple-terrible-tethriterator",value:"{100, 100 [1 / 4, 2] 2}"},
+{name:"Tethriditerator",value:"{100, 100 [1 / 1, 3] 2}"},
+{name:"Tethritriterator",value:"{100, 100 [1 / 1, 4] 2}"},
+{name:"Tethrigriditerator",value:"{100, 100 [1 / 1, 1, 2] 2}"},
+{name:"Tethrispatialator",value:"{100, 100 [1 / 1 [2] 2] 2}"},
+{name:"Dustaculated-tethrathoth",value:"{100, 100 [1 / 1 [1 / 2] 2] 2}"},
+{name:"Tethracross",value:"{100, 49 [1 / 1 / 2] 2}"},
+{name:"Terrible tethracross",value:"{100, 100 [1 / 2 / 2] 2}"},
+{name:"Double-terrible tethracross",value:"{100, 100 [1 / 3 / 2] 2}"},
+{name:"Secundotethrated-tethracross",value:"{100, 100 [1 / 1 / 3] 2}"},
+{name:"Thrice-tethrasecunda",value:"{100, 100 [1 / 1 / 4] 2}"},
+{name:"Quatrice-tethrasecunda",value:"{100, 100 [1 / 1 / 5] 2}"},
+{name:"Quincice-tethrasecunda",value:"{100, 100 [1 / 1 / 6] 2}"},
+{name:"Tethritercross",value:"{100, 100 [1 / 1 / 1, 2] 2}"},
+{name:"Terrisquared tethritercross",value:"{100, 100 [1 / 1 / 2, 2] 2}"},
+{name:"Tethriditercross",value:"{100, 100 [1 / 1 / 1, 3] 2}"},
+{name:"Tethritritercross",value:"{100, 100 [1 / 1 / 1, 4] 2}"},
+{name:"Tethrigriditercross",value:"{100, 100 [1 / 1 / 1, 1, 2] 2}"},
+{name:"Tethricubiculcross",value:"{100, 100 [1 / 1 / 1, 1, 1, 2] 2}"},
+{name:"Tethracubor",value:"{100, 49 [1 / 1 / 1 / 2] 2}"},
+{name:"Tethraducubor",value:"{100, 49 [1 / 1 / 1 / 3] 2}"},
+{name:"Tethratricubor",value:"{100, 100 [1 / 1 / 1 / 4] 2}"},
+{name:"Tethrateron",value:"{100, 49 [1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethrapeton",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethrahexon",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethrahepton",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethra-ogdon-tethratope",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethraennon",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethradekon",value:"{100, 49 [1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 1 / 2] 2}"},
+{name:"Tethratope",value:"{100, 100 [1 [2 ~ 2] 2] 2}"},
+{name:"Triakulus",value:"{3, 3 [1 [1, 2 ~ 2] 2] 2}"},
+{name:"Tethrarxitri",value:"{100, 100 [1 [1 [1 / 2] 2 ~ 2] 2] 2}"},
+{name:"Kungulus",value:"{10, 100 [1 [1 / 2 ~ 2] 2] 2}"},
+{name:"Pentacthulhum",value:"{100, 100 [1 [1 / 2 ~ 2] 2] 2}"},
+{name:"Pentacthulcross",value:"{100, 100 [1 [1 / 2 ~ 2] 1 / 2] 2}"},
+{name:"Pentacthultope",value:"{100, 100 [1 [1 / 2 ~ 2] 1 [2 ~ 2] 2] 2}"},
+{name:"Pentacthul-tethrathoth",value:"{100, 100 [1 [1 / 2 ~ 2] 1 [1 [1 / 2] 2 ~ 2] 2] 2}"},
+{name:"Pentacthularxitri",value:"{100, 100 [1 [1 / 2 ~ 2] 1 [1 [1 [1 / 2 ~ 2] 2] 2 ~ 2] 2] 2}"},
+{name:"Quadrunculus",value:"{10, 100 [1 [1 / 2 ~ 2] 1 [1 / 2 ~ 2] 2] 2}"},
+{name:"Hexacthulhum",value:"{100, 100 [1 [1 / 2 ~ 2] 1 [1 / 2 ~ 2] 2] 2}"},
+{name:"Humongulus",value:"{10, 98 [1 [2 / 2 ~ 2] 2] 2}"},
+{name:"Godsgodgulus",value:"{100, 100 [1 [2 / 2 ~ 2] 2] 2}"},
+{name:"The centurion",value:"{100, 100 [1 [1, 2 / 2 ~ 2] 2] 2}"},
+{name:"Super centurion",value:"{100, 100 [1 [1 [1 / 2] 2 / 2 ~ 2] 2] 2}"},
+{name:"Blasphemorgulus",value:"{100, 100 [1 [1 / 3 ~ 2] 2] 2}"},
+{name:"Ludicriss",value:"{100, 100 [1 [1 / 3 ~ 2] 1, 1, 2] 2}"},
+{name:"Agoraphobia",value:"{100, 100 [1 [1 / 3 ~ 2] 1 / 2] 2}"},
+{name:"Astralthrathoth",value:"{100, 100 [1 [1 / 3 ~ 2] 1 / 1 / 2] 2}"},
+{name:"Blasphemorguldeus",value:"{10, 100 [1 [1 / 3 ~ 2] 1 [1 / 3 ~ 2] 2] 2}"},
+{name:"Tetdecatrix",value:"{10, 10 [1 [2 / 3 ~ 2] 2] 2}"},
+{name:"Gorgonghoulgog",value:"{100, 100 [1 [2 / 3 ~ 2] 2] 2}"},
+{name:"Transmorgrifihgh",value:"{100, 100 [1 [1 / 4 ~ 2] 2] 2}"},
+{name:"Iniquifihgh",value:"{100, 100 [1 [1 / 5 ~ 2] 2] 2}"},
+{name:"Conflagrifihgh",value:"{100, 100 [1 [1 / 6 ~ 2] 2] 2}"},
+{name:"Goobawanda",value:"{10, 100 [1 [1 / 1, 2 ~ 2] 2] 2}"},
+{name:"Hundredrifihgh",value:"{100, 100 [1 [1 / 1, 2 ~ 2] 2] 2}"},
+{name:"TREE(3)",value:"{3, 3 [1 [2 / 1, 2 ~ 2] 2] 2}"},
+{name:"SSCG(3)",value:"{3, 3 [1 [1 / 1, 1, 2 ~ 2] 1 [3 / 2 ~ 2] 1 [3 / 2 ~ 2] 1 [3 / 2 ~ 2] 1 [3 / 2 ~ 2] 2] 2}"},
+{name:"Gibbawamba",value:"{10, 100 [1 [1 / 1 / 2 ~ 2] 2] 2}"},
+{name:"Babbulbufihgh",value:"{100, 100 [1 [1 / 1 / 2 ~ 2] 2] 2}"},
+{name:"Setoobawamba",value:"{10, 100 [1 [1 / 1 / 2 ~ 2] 1 [1 / 6 ~ 2] 2] 2}"},
+{name:"Admiratrix",value:"{10, 10 [1 [2 / 1 / 3 ~ 2] 2] 2}"},
+{name:"Geebawamda",value:"{100, 100 [1 [1 / 1 / 1 / 2 ~ 2] 2] 2}"},
+{name:"Gasslorgulus",value:"{10, 300 [1 [1 [2 ~ 2] 2 ~ 2] 2] 2}"},
+{name:"Sigglorgulus",value:"{10, 900 [1 [1 [2 ~ 2] 2 ~ 2] 2] 2}"},
+{name:"Boplapulus",value:"{10, 100 [1 [1 [1 / 1 / 1, 2 ~ 2] 2 ~ 2] 2] 2}"},
+{name:"Pentacthulhum",value:"{100, 100 [1 [1 ~ 3] 2] 2}"},
+{name:"Extremexul",value:"{200, 199 [1 [1 ~ 3] 2] 2}"},
+{name:"Grand pentacthulhum",value:"{100, 3, 2 [1 [1 ~ 3] 2] 2}"},
+{name:"Pentacthulcross",value:"{100, 100 [1 [1 ~ 3] 1 / 2] 2}"},
+{name:"Kingulus",value:"{100, 100 [1 [1 ~ 3] 1 [1 [1 ~ 3] 2] 2] 2}"},
+{name:"Quadrunculus",value:"{10, 100 [1 [1 ~ 3] 1 [1 ~ 3] 2] 2}"},
+{name:"Hexacthulhum",value:"{100, 100 [1 [1 ~ 3] 1 [1 ~ 3] 2] 2}"},
+{name:"Godsgodgulus",value:"{100, 99 [1 [2 ~ 3] 2] 2}"},
+{name:"Agoraphobia",value:"{100, 100 [1 [1 ~ 4] 1 / 2] 2}"},
+{name:"Demagogue",value:"{100, 99 [1 [1 ~ 10] 2] 2}"},
+{name:"Big Hoss", Value:"Big Hoss"},
+{name:"Tritar",value:"Tar(3)"},
+{name:"Quadritar",value:"Tar(4)"},
+{name:"Quintitar",value:"Tar(5)"},
+{name:"Sextitar",value:"Tar(6)"},
+{name:"Septitar",value:"Tar(7)"},
+{name:"Octitar",value:"Tar(8)"},
+{name:"Nonitar",value:"Tar(9)"},
+{name:"Dekotar",value:"Tar(10)"},
+{name:"Hektotar",value:"Tar(100)"},
+{name:"Kilotar",value:"Tar(1,000)"},
+{name:"Megotar",value:"Tar(1,000,000)"},
+{name:"Gigotar",value:"Tar(1,000,000,000)"},
+{name:"Terotar",value:"Tar(1,000,000,000,000)"},
+{name:"Petotar",value:"Tar(1,000,000,000,000,000)"},
+{name:"Exotar",value:"Tar(10^18)"},
+{name:"Zettotar",value:"Tar(10^21)"},
+{name:"Yottotar",value:"Tar(10^24)"},
+{name:"Ronnotar",value:"Tar(10^27)"},
+{name:"Quettotar",value:"Tar(10^30)"},
+{name:"Unintar",value:"Tar(Tar(3))"},
+{name:"Bintar",value:"Tar(Tar(Tar(3)))"},
+{name:"Trintar",value:"Tar(Tar(Tar(Tar(3))))"},
+{name:"Quadrintar",value:"Tar(Tar(Tar(Tar(Tar(3)))))"},
+{name:"Quintintar",value:"Tar6(3)"},
+{name:"Sextintar",value:"Tar7(3)"},
+{name:"Septintar",value:"Tar8(3)"},
+{name:"Octintar",value:"Tar9(3)"},
+{name:"Nonintar",value:"Tar10(3)"},
+{name:"Dekintar",value:"Tar11(3)"},
+{name:"Hektintar",value:"Tar101(3)"},
+{name:"Killintar",value:"Tar1,001(3)"},
+{name:"Megintar",value:"Tar1,000,001(3)"},
+{name:"Gigintar",value:"Tar1,000,000,001(3)"},
+{name:"Terintar",value:"Tar1,000,000,000,001(3)"},
+{name:"Petintar",value:"Tar1,000,000,000,000,001(3)"},
+{name:"Exintar",value:"Tar10^18 + 1(3)"},
+{name:"Zettintar",value:"Tar10^21 + 1(3)"},
+{name:"Yottintar",value:"Tar10^24 + 1(3)"},
+{name:"Ronnintar",value:"Tar10^27 + 1(3)"},
+{name:"Quettintar",value:"Tar10^30 + 1(3)"},
+{name:"Tarintar",value:"TarTar(3) + 1(3)"},
+{name:"Loader’s Number",value:"D5(99)"},
+{name:"Franklin’s Number",value:"D5(9,999,999,999)"},
+{name:"Atenoceo’s Number",value:"D5(10^11-1)"},
+{name:"Richard’s Number",value:"D5(10^100-1)"},
+{name:"Loader’-’s Number",value:"D⁶(99)"},
+{name:"Bashicu Matrix Number",value:"fLimit of BMS(10)"},
+{name:"６",value:"N Primitive"},
+{name:"Y Sequence Number",value:"fLimit of Y-Sequence(10)"},
+{name:"Inaccessible Number",value:"f<?>1(100)"},
+{name:"Yudkowsky’s Number",value:"Largest valid computable number yet"},
+{name: "Rayo's Number",value:"Rayo(10^100)"},
+{name:"Oblivion",value:"Oblivion"},
+{name: "Infinity", value: "∞"},
+{name:"Absolute Infinity",value:"Ω"},
+{name:"Absolute One Infinity",value:"Ω1"},
+{name:"Absolute Two Infinity",value:"Ω2"},
+{name:"Absolute Three Infinity",value:"Ω3"},
+{name:"Absolute Four Infinity",value:"Ω4"},
+{name:"Absolute Five Infinity",value:"Ω5"},
+{name:"Absolute Six Infinity",value:"Ω6"},
+{name:"Absolute Seven Infinity",value:"Ω7"},
+{name:"Absolute Eight Infinity",value:"Ω8"},
+{name:"Absolute Nine Infinity",value:"Ω9"},
+{name:"Absolute Ten Infinity",value:"Ω10"},
+{name:"Absolute Eleven Infinity",value:"Ω11"},
+{name:"Absolute Twelve Infinity",value:"Ω12"},
+{name:"Absolute Thirteen Infinity",value:"Ω13"},
+{name:"Absolute Fourteen Infinity",value:"Ω14"},
+{name:"Absolute Fifteen Infinity",value:"Ω15"},
+{name:"Absolute Twenty Infinity",value:"Ω20"},
+{name:"Absolute Twenty-Five Infinity",value:"Ω25"},
+{name:"Absolute Thirty Infinity",value:"Ω30"},
+{name:"Absolute Forty Infinity",value:"Ω40"},
+{name:"Absolute Fifty Infinity",value:"Ω50"},
+{name:"Absolute Sixty Infinity",value:"Ω60"},
+{name:"Absolute Seventy Infinity",value:"Ω70"},
+{name:"Absolute Eighty Infinity",value:"Ω80"},
+{name:"Absolute Ninety Infinity",value:"Ω90"},
+{name:"Absolute Hundred Infinity",value:"Ω100"},
+{name:"Absolute Two Hundred Infinity",value:"Ω200"},
+{name:"Absolute Five Hundred Infinity",value:"Ω500"},
+{name:"Absolute Thousand Infinity",value:"Ω1,000"},
+{name:"Absolute Five Thousand Infinity",value:"Ω5,000"},
+{name:"Absolute Ten Thousand Infinity",value:"Ω10,000"},
+{name:"Absolute Fifty Thousand Infinity",value:"Ω30,000"},
+{name:"Absolute One Hundred Thousand Infinity",value:"Ω100,000"},
+{name:"Absolute Five Hundred Thousand Infinity",value:"Ω500,000"},
+{name:"Absolute Million Infinity",value:"Ω1,000,000"},
+{name:"Absolute Billion Infinity",value:"Ω1,000,000,000"},
+{name:"Absolute Dialogue Infinity",value:"Ω10,000,000,000"},
+{name:"Absolute Trillion Infinity",value:"Ω1,000,000,000,000"},
+{name:"Absolute Quadrillion Infinity",value:"Ω10^15"},
+{name:"Absolute Quintillion Infinity",value:"Ω10^18"},
+{name:"Absolute Decillion Infinity",value:"Ω10^33"},
+{name:"Absolute Vigintillion Infinity",value:"Ω10^63"},
+{name:"Absolute Trigintillion Infinity",value:"Ω10^93"},
+{name:"Absolute Googol Infinity",value:"Ω10^100"},
+{name:"Absolute Centillion Infinity",value:"Ω10^303"},
+{name:"Absolute Googolchime Infinity",value:"Ω10^1,000"},
+{name:"Absolute Millinillion Infinity",value:"Ω10^3,003"},
+{name:"Absolute Micrillion Infinity",value:"Ω10^3,000,003"},
+{name:"Absolute Trialogue Infinity",value:"Ω10^10^10"},
+{name:"Absolute Googolplex Infinity",value:"Ω10^10^100"},
+{name:"Absolute Tetralogue Infinity",value:"Ω10^10^10^10"},
+{name:"Absolute Pentalogue Infinity",value:"Ω10^10^10^10^10"},
+{name:"Absolute Decker Infinity",value:"Ω10^^10"},
+{name:"Absolute Tridecal Infinity",value:"Ω10{10}10"},
+{name:"Absolute Boogol Infinity",value:"Ω10{100}10"},
+{name:"Absolute Graham’s Infinity",value:"ΩG64"},
+{name:"Absolute General Infinity",value:"Ω{10,10,10,10}"},
+{name:"Absolute Iteral Infinity",value:"Ω{10,10 [2] 2}"},
+{name:"Absolute Goobol Infinity",value:"Ω{10,100 [2] 2}"},
+{name:"Absolute Admiral Infinity",value:"Ω{10,10 [2] 1 [2] 2}"},
+{name:"Absolute Xappol Infinity",value:"Ω{10,10 [3] 2}"},
+{name:"Absolute Gootrol Infinity",value:"Ω{10,100 [3] 2}"},
+{name:"Absolute Dimendecal Infinity",value:"Ω{10,10 [11] 2}"},
+{name:"Absolute Tree(3) Infinity",value:"ΩTREE(3)"},
+{name:"Absolute SSCG(3) Infinity",value:"ΩSSCG(3)"},
+{name:"Absolute Tritar Infinity",value:"ΩTar(3)"},
+{name:"Absolute Bintar Infinity",value:"ΩTar(Tar(3))"},
+{name:"Absolute Tarintar Infinity",value:"ΩTar^Tar(Tar(3))"},
+{name:"Absolute Rayo’s Infinity",value:"ΩRayo(10^100)"},
+{name:"Absolute Oblivion Infinity",value:"ΩOblivion"},
+{name:"Absolute Utter Oblivion Infinity",value:"ΩUtter Oblivion"},
+{name:"Absolute Infinite Infinity",value:"Ω∞"},
+{name:"Absolute Inaccessible Cardinal Infinity",value:"ΩI"},
+{name:"Absolute Mahlo Cardinal Infinity",value:"ΩM"},
+{name:"Absolute Weakly Compact Cardinal Infinity",value:"ΩK"},
+{name:"Absolutely Infinity",value:"ΩΩ"},
+{name:"Absolutely One Infinity",value:"ΩΩ1"},
+{name:"Absolutely Two Infinity",value:"ΩΩ2"},
+{name:"Absolutely Three Infinity",value:"ΩΩ3"},
+{name:"Absolutely Four Infinity",value:"ΩΩ4"},
+{name:"Absolutely Five Infinity",value:"ΩΩ5"},
+{name:"Absolutely Six Infinity",value:"ΩΩ6"},
+{name:"Absolutely Seven Infinity",value:"ΩΩ7"},
+{name:"Absolutely Eight Infinity",value:"ΩΩ8"},
+{name:"Absolutely Nine Infinity",value:"ΩΩ9"},
+{name:"Absolutely Ten Infinity",value:"ΩΩ10"},
+{name:"Absolutely Twenty Infinity",value:"ΩΩ20"},
+{name:"Absolutely Hundred Infinity",value:"ΩΩ100"},
+{name:"Absolutely Googol Infinity",value:"ΩΩ10^100"},
+{name:"Absolutely Boogol Infinity",value:"ΩΩ10{100}10"},
+{name:"Absolutely Graham’s Infinity",value:"ΩΩG64"},
+{name:"Absolutely Tree(3) Infinity",value:"ΩΩTREE(3)"},
+{name:"Absolutely Infinite Infinity",value:"ΩΩ∞"},
+{name:"Absolutely Of Three Infinity",value:"ΩΩΩ"},
+{name:"Absolutely Of Four Infinity",value:"ΩΩΩΩ"},
+{name:"Absolutely Of Five Infinity",value:"ΩΩΩΩΩ"},
+{name:"Absolutely Of Six Infinity",value:"ΩΩΩΩΩΩ"},
+{name:"Absolutely Of Ten Infinity",value:"ΩΩΩΩΩΩΩΩΩΩ"},
+
+];
+
+
+
+/* =========================================================
+   BIG NUMBER
+   ========================================================= */
+
+const nNew=(m,e)=>{
+  if(m===0)return{m:0,e:0};
+
+  const c=Math.floor(
+    Math.log10(Math.abs(m))
+  );
+
+  return{
+    m:m/Math.pow(10,c),
+    e:e+c
+  };
+};
+
+const nAdd=(a,b)=>{
+  if(a.m===0)return b;
+  if(b.m===0)return a;
+
+  const d=a.e-b.e;
+
+  if(d>15)return a;
+  if(d<-15)return b;
+
+  return nNew(
+    a.m*Math.pow(10,d)+b.m,
+    b.e
+  );
+};
+
+const nSub=(a,b)=>{
+  const d=a.e-b.e;
+
+  if(d>15)return a;
+  if(d<-15)return nNew(-b.m,b.e);
+
+  return nNew(
+    a.m*Math.pow(10,d)-b.m,
+    b.e
+  );
+};
+
+const nGte=(a,b)=>{
+  if(a.e!==b.e){
+    return a.e>b.e;
+  }
+
+  return a.m>=b.m;
+};
+
+const nPow=(base,exponent)=>{
+  if(exponent===0){
+    return{m:1,e:0};
+  }
+
+  const t=
+    exponent*Math.log10(base);
+
+  const e=Math.floor(t);
+
+  return nNew(
+    Math.pow(10,t-e),
+    e
+  );
+};
+
+const fNum=n=>{
+  if(n.m===0)return"0";
+
+  if(n.e<4){
+    return Math.floor(
+      n.m*Math.pow(10,n.e)
+    ).toString();
+  }
+
+  return n.m.toFixed(2)+"e"+n.e;
+};
+
+
+/* =========================================================
+   GAME STATE
+   ========================================================= */
+
+let coins={m:0,e:0};
+
+let upgradeTier=
+  parseInt(
+    localStorage.getItem("micronym_upgrade")
+  )||0;
+
+
+let grid=Array(64).fill(1);
+
+try{
+
+  const savedGrid=
+    localStorage.getItem("micronym_grid");
+
+  if(savedGrid){
+
+    const loadedGrid=
+      JSON.parse(savedGrid);
+
+    if(
+      Array.isArray(loadedGrid)&&
+      loadedGrid.length===64&&
+      loadedGrid.every(
+        tile=>
+          Number.isInteger(tile)&&
+          tile>=0
+      )
+    ){
+
+      grid=loadedGrid;
+
+    }
+
+  }
+
+}catch(e){
+
+  grid=Array(64).fill(1);
+
+}
+
+let selected=null;
+
+let maxTileInRun=
+  parseInt(
+    localStorage.getItem(
+      "micronym_run_best"
+    )
+  )||1;
+
+let bestTileAllTime=
+  parseInt(
+    localStorage.getItem(
+      "micronym_best"
+    )
+  )||maxTileInRun;
+
+
+/* =========================================================
+   LOAD COINS SAFELY
+   ========================================================= */
+
+try{
+
+  const savedCoins=
+    localStorage.getItem(
+      "micronym_coins"
+    );
+
+  if(savedCoins){
+
+    const parts=
+      savedCoins.split("e");
+
+    if(parts.length===2){
+
+      coins=nNew(
+        parseFloat(parts[0]),
+        parseInt(parts[1])
+      );
+
+    }
+
+  }
+
+}catch(e){
+
+  coins={m:0,e:0};
+
+}
+
+
+/* =========================================================
+   COST = 10,000 × BASE^TIER
+   ========================================================= */
+
+function getBase(){
+
+  return Math.max(
+    3.01
+
+    
+  );
+
+}
+
+function getCost(){
+
+  const power=
+    nPow(
+      getBase(),
+      upgradeTier
+    );
+
+  return nNew(
+    power.m*10000/(Math.log(upgradeTier)/Math.log(5)),
+    power.e
+  );
+
+}
+
+
+/* =========================================================
+   SPAWN
+   ========================================================= */
+
+function getSpawnTier(){
+
+  return Math.min(
+    upgradeTier+1,
+    tiers.length
+  );
+
+}
+
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+
+function save(){
+
+  localStorage.setItem(
+    "micronym_coins",
+    coins.m+"e"+coins.e
+  );
+
+  localStorage.setItem(
+    "micronym_upgrade",
+    upgradeTier
+  );
+
+  localStorage.setItem(
+    "micronym_grid",
+    JSON.stringify(grid)
+  );
+
+  localStorage.setItem(
+    "micronym_run_best",
+    maxTileInRun
+  );
+
+  localStorage.setItem(
+    "micronym_best",
+    bestTileAllTime
+  );
+
+}
+
+
+/* =========================================================
+   TIER COLORS
+   ========================================================= */
+
+function tierColor(tier){
+
+  const hue=
+    ((tier-1)%360)+1;
+
+  return `hsl(${hue},100%,50%)`;
+
+}
+
+
+/* =========================================================
+   BOARD
+   ========================================================= */
+
+function fillBoard(){
+
+  const spawn=
+    getSpawnTier();
+
+  grid.forEach((x,i)=>{
+
+    if(x===0){
+
+      grid[i]=spawn;
+
+    }
+
+    if(
+      grid[i]>maxTileInRun
+    ){
+
+      maxTileInRun=
+        grid[i];
+
+    }
+
+  });
+
+  if(
+    maxTileInRun>
+    bestTileAllTime
+  ){
+
+    bestTileAllTime=
+      maxTileInRun;
+
+  }
+
+}
+
+
+/* =========================================================
+   MERGE
+   ========================================================= */
+
+let mergeAllCooldown = false;
+
+function mergeAll(){
+
+  // 10 second cooldown
+  if(mergeAllCooldown){
+    return;
+  }
+
+  mergeAllCooldown=true;
+
+  let merged=true;
+
+  while(merged){
+
+    merged=false;
+
+    // Find two tiles of the same tier
+    outer:
+    for(let a=0;a<grid.length;a++){
+
+      if(grid[a]===0){
+        continue;
+      }
+
+      for(let b=a+1;b<grid.length;b++){
+
+        if(
+          grid[b]===grid[a] &&
+          grid[b]>0
+        ){
+
+          const tier=
+            grid[a];
+
+          const next=
+            tier+1;
+
+          // Remove both
+          grid[a]=0;
+          grid[b]=0;
+
+          // Create next tier
+          grid[b]=next;
+
+          // Give coins exactly like normal merging
+          coins=nAdd(
+            coins,
+            nPow(3,next)
+          );
+
+          // Best tile
+          if(next>maxTileInRun){
+            maxTileInRun=next;
+          }
+
+          if(maxTileInRun>bestTileAllTime){
+            bestTileAllTime=maxTileInRun;
+          }
+
+          merged=true;
+
+          break outer;
+        }
+
+      }
+
+    }
+
+  }
+
+  selected=null;
+
+  // Refill empty spaces after ALL merging is finished
+  fillBoard();
+
+  save();
+  render();
+
+  // 10 seconds
+  setTimeout(()=>{
+
+    mergeAllCooldown=false;
+
+  },10000);
+
+}
+
+
+/* =========================================================
+   MERGE ALL KEYBIND
+   M = MERGE ALL
+   ========================================================= */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(
+    e.key.toLowerCase()==="m" &&
+    !e.repeat
+  ){
+
+    mergeAll();
+
+  }
+
+});
+
+/* =========================================================
+   CLICK TILE
+   ========================================================= */
+
+function clickTile(index){
+
+  const from=
+    selected;
+
+  const to=
+    grid[index];
+
+  if(
+    from===null
+  ){
+
+    if(
+      to>0
+    ){
+
+      selected=index;
+
+    }
+
+    render();
+    return;
+
+  }
+
+  if(
+    from===index
+  ){
+
+    selected=null;
+    render();
+    return;
+
+  }
+
+  /* =====================================================
+     SAME TIER = NEXT GOOGOLOGISM
+     ===================================================== */
+
+  if(
+    from!==null &&
+    grid[from]===to &&
+    to>0
+  ){
+
+    const next=
+      grid[from]+1;
+
+    grid[from]=0;
+    grid[index]=next;
+
+    coins=nAdd(
+      coins,
+      nPow(3,next)
+    );
+
+    if(
+      next>maxTileInRun
+    ){
+
+      maxTileInRun=
+        next;
+
+    }
+
+    if(
+      maxTileInRun>
+      bestTileAllTime
+    ){
+
+      bestTileAllTime=
+        maxTileInRun;
+
+    }
+
+    selected=null;
+
+    fillBoard();
+    save();
+    render();
+
+    return;
+  }
+
+
+  /* =====================================================
+     MOVE
+     ===================================================== */
+
+  if(to===0){
+
+    grid[index]=
+      grid[from];
+
+    grid[from]=0;
+
+    selected=null;
+
+    save();
+    render();
+
+    return;
+  }
+
+
+  /* SELECT OTHER TILE */
+  selected =
+    to > 0
+      ? index
+      : null;
+
+  render();
+
+}
+
+/* =========================================================
+   UPGRADE
+   ========================================================= */
+
+function buyUpgrade(){
+
+  const cost=
+    getCost();
+
+  if(
+    !nGte(
+      coins,
+      cost
+    )
+  ){
+
+    return;
+
+  }
+
+  coins=
+    nSub(
+      coins,
+      cost
+    );
+
+  upgradeTier++;
+
+
+  const spawn=
+    getSpawnTier();
+
+  grid.forEach((x,i)=>{
+
+    if(
+      x>0&&
+      x<spawn
+    ){
+
+      grid[i]=spawn;
+
+    }
+
+  });
+
+  fillBoard();
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   RESET RUN
+   DOES NOT DELETE BEST SCORE
+   ========================================================= */
+
+function resetGame(){
+
+  if(
+    !confirm(
+      "Zresetować run?"
+    )
+  ){
+
+    return;
+
+  }
+
+  coins={
+    m:0,
+    e:0
+  };
+
+  upgradeTier=0;
+
+  grid=
+    Array(64).fill(1);
+
+  selected=null;
+
+  maxTileInRun=1;
+
+  fillBoard();
+
+  save();
+  render();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(text){
+
+  return String(text)
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+
+function render(){
+
+  const spawn=
+    getSpawnTier();
+
+  const cost=
+    getCost();
+
+
+  /* =====================================================
+     COINS
+     ===================================================== */
+
+  document.getElementById(
+    "s"
+  ).innerText=
+    "MONETY: "+
+    fNum(coins);
+
+
+  /* =====================================================
+     SPAWN
+     ===================================================== */
+
+  document.getElementById(
+    "p"
+  ).innerText=
+    "SPAWN KAFELKÓW: TIER "+
+    spawn;
+
+
+  /* =====================================================
+     UPGRADE BUTTON
+     ===================================================== */
+
+  const uBtn=
+    document.getElementById(
+      "uBtn"
+    );
+
+  uBtn.innerText=
+    "+1 BASE BLOCK (KOSZT: "+
+    fNum(cost)+
+    ")";
+
+  uBtn.disabled=
+    !nGte(
+      coins,
+      cost
+    );
+
+
+  /* =====================================================
+     BOARD
+     ===================================================== */
+
+  const board=
+    document.getElementById(
+      "g"
+    );
+
+  board.innerHTML="";
+
+
+  grid.forEach(
+    (tier,index)=>{
+
+      const tile=
+        document.createElement(
+          "div"
+        );
+
+      tile.className=
+        "tile";
+
+
+      /* EMPTY */
+
+      if(tier===0){
+
+        tile.classList.add(
+          "empty"
+        );
+
+      }
+
+
+      /* NON-EMPTY */
+
+      else{
+
+        const data=
+          tiers[tier-1];
+
+        const name=
+          data
+            ?data.name
+            :"Tier "+tier;
+
+        const value=
+          data
+            ?data.value
+            :"Next googologism";
+
+
+        tile.style.background=
+          tierColor(tier);
+
+
+        if(
+          selected===index
+        ){
+
+          tile.classList.add(
+            "selected"
+          );
+
+        }
+
+
+        const text=
+          document.createElement(
+            "div"
+          );
+
+        text.className=
+          "tile-name";
+
+        text.innerHTML=
+          `<b>${
+            escapeHTML(name)
+          }</b>
+           <br>
+           <small>${
+             escapeHTML(value)
+           }</small>`;
+
+        tile.appendChild(
+          text
+        );
+
+
+        const tierText=
+          document.createElement(
+            "div"
+          );
+
+        tierText.className=
+          "tile-tier";
+
+        tierText.innerText=
+          "T"+tier;
+
+        tile.appendChild(
+          tierText
+        );
+
+      }
+
+
+      tile.onclick=
+        ()=>clickTile(index);
+
+      board.appendChild(
+        tile
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     BEST TILE
+     ===================================================== */
+
+  const bestData=
+    tiers[
+      bestTileAllTime-1
+    ];
+
+
+  document.getElementById(
+    "leaderboardList"
+  ).innerHTML=
+    `Najlepszy kafel:
+     <b>Tier ${
+       bestTileAllTime
+     }</b>
+     ${
+       bestData
+         ?" — "+
+          escapeHTML(
+            bestData.name
+          )
+         :""
+     }`;
+
+}
+
+
+/* =========================================================
+   PASSIVE COINS
+   ========================================================= */
+
+setInterval(()=>{
+
+  let income={
+    m:0,
+    e:0
+  };
+
+
+  grid.forEach(
+    tier=>{
+
+      if(tier>0){
+
+        income=
+          nAdd(
+            income,
+            nPow(3,tier)
+          );
+
+      }
+
+    }
+  );
+
+
+  coins=
+    nAdd(
+      coins,
+      income
+    );
+
+
+  save();
+  render();
+
+},1000);
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+if(
+  grid.every(
+    v=>v===0
+  )
+){
+
+  fillBoard();
+
+}
+
+fillBoard();
+
+save();
+
+render();
+
+</script>
+</body>
+</html>
