@@ -27,10 +27,12 @@ body {
   padding:25px;
 }
 
+/* TITLE + SPAWN TEXT */
 #s {
   font-size:30px;
   letter-spacing:2px;
   margin-bottom:5px;
+  text-align:center;
 }
 
 #p {
@@ -39,6 +41,7 @@ body {
   margin-bottom:15px;
   letter-spacing:1px;
   animation:blink 1.5s infinite;
+  text-align:center;
 }
 
 @keyframes blink {
@@ -46,8 +49,11 @@ body {
   50% { opacity:.5; }
 }
 
+/* BUTTONS */
 .controls {
   display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
   gap:10px;
   margin-bottom:20px;
 }
@@ -61,6 +67,7 @@ button {
   cursor:pointer;
   letter-spacing:1px;
   transition:.15s;
+  min-width:140px;
 }
 
 #uBtn {
@@ -81,19 +88,23 @@ button:active { transform:scale(.96); }
   cursor:not-allowed;
 }
 
+/* RESPONSIVE GRID */
 #g {
   display:grid;
-  grid-template-columns:repeat(8,150px);
+  grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
   gap:8px;
   background:#1c1c24;
   padding:15px;
   border-radius:16px;
   box-shadow:0 8px 32px rgba(0,0,0,.4);
+  width:100%;
+  max-width:1200px;
 }
 
+/* TILES */
 .tile {
-  width:150px;
-  height:150px;
+  width:100%;
+  aspect-ratio:1/1;
   border-radius:12px;
   border:2px solid rgba(255,255,255,.15);
   display:flex;
@@ -141,13 +152,15 @@ button:active { transform:scale(.96); }
   opacity:.75;
 }
 
+/* LEADERBOARD */
 .leaderboard {
   margin-top:20px;
   background:#1c1c24;
   padding:12px;
   border-radius:12px;
   box-shadow:0 4px 15px rgba(0,0,0,.3);
-  width:320px;
+  width:100%;
+  max-width:320px;
   text-align:center;
   color:white;
   font-size:14px;
@@ -170,7 +183,6 @@ button:active { transform:scale(.96); }
 <div class="controls">
   <button id="uBtn" onclick="buyUpgrade()">+1 BASE BLOCK</button>
   <button id="resetBtn" onclick="resetGame()">RESET RUN</button>
-
 </div>
 
 <div id="g"></div>
@@ -179,6 +191,8 @@ button:active { transform:scale(.96); }
   <h3>🏆 TWÓJ REKORD RUNU</h3>
   <div id="leaderboardList">Najlepszy kafel: Tier 1</div>
 </div>
+
+</body>
 
 <script>
 
