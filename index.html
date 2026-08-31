@@ -186,6 +186,10 @@ button:active { transform:scale(.96); }
   <button id="uBtn" onclick="buyUpgrade()">+1 BASE BLOCK</button>
   <button id="resetBtn" onclick="resetGame()">RESET RUN</button>
 </div>
+<select id="notationSelect">
+  <option value="scientific">Scientific (default)</option>
+  <option value="roman">Roman</option>
+</select>
 
 <div id="g"></div>
 
@@ -198,9 +202,129 @@ button:active { transform:scale(.96); }
 
 <script>
 
-/* =========================================================
-   YOUR COMPLETE MICRONYM / GOOGOLOGY LIST
-   ========================================================= */
+class U {
+ 
+
+    constructor() {
+
+        // Roman table ONLY up to 3999 (no overlines)
+        this.F = [
+            [1000, "M"],
+            [900,  "CM"],
+            [500,  "D"],
+            [400,  "CD"],
+            [100,  "C"],
+            [90,   "XC"],
+            [50,   "L"],
+            [40,   "XL"],
+            [10,   "X"],
+            [9,    "IX"],
+            [5,    "V"],
+            [4,    "IV"],
+            [1,    "I"]
+        ];
+
+        this.frac = ["", "·", ":", "∴", "∷", "⁙"];
+    }
+
+    mapToRoman(n) {
+        let out = "";
+        for (const [v, r] of this.F) {
+            while (n >= v) {
+                out += r;
+                n -= v;
+            }
+        }
+        return out;
+    }
+
+    fracPart(x) {
+        let t = Math.round(x * 12);
+
+        if (t === 0) return "";
+        if (t === 12) return ""; // full unit
+
+        if (t < 6) return this.frac[t];
+        return "S" + this.frac[t - 6];
+    }
+
+    formatDecimal(n) {
+        if (n.m === 0) return "O";
+
+        // exponent = floor(e / 9)
+        let exp = Math.floor(n.e / 9);
+
+        // leftover exponent
+        let remExp = n.e % 9;
+
+        // mantissa scaled by leftover exponent
+        let mantissa = n.m * Math.pow(10, remExp);
+
+        // clamp mantissa into 1–3999 range
+        let intPart = Math.floor(mantissa % 4000);
+        if (intPart === 0) intPart = 1;
+
+        let frac = mantissa - Math.floor(mantissa);
+
+        // Roman mantissa
+        let romanMantissa = this.mapToRoman(intPart);
+
+        if (frac > 0 && frac < 1) {
+            romanMantissa += this.fracPart(frac);
+        }
+
+        // Roman exponent
+               let romanExp = this.formatExponent(exp);
+        return romanMantissa + "^" + romanExp;
+   }   
+     
+ 
+    
+formatExponent(exp) {
+    if (exp <= 3999) {
+        return this.mapToRoman(exp);
+    }
+
+    let base = exp % 4000;
+    let tier = Math.floor(exp / 4000);
+
+    let baseRoman = this.mapToRoman(base);
+    let tierRoman = this.mapToRoman(tier);
+
+    return baseRoman + "^" + tierRoman;
+}
+
+      
+
+
+
+    get name() {
+        return "Roman";
+    }
+  }
+
+
+
+function setNotationMode(mode) {
+  notationMode = mode;
+}
+const RomanFormatter = new U();
+let notationMode = "scientific";
+function fNumRouter({m,e}) {
+  if (notationMode === "roman") {
+    return RomanFormatter.formatDecimal({m,e});
+  }
+  return fNum({m,e});
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const sel = document.getElementById("notationSelect");
+  sel.addEventListener("change", e => {
+    setNotationMode(e.target.value);
+    render();
+  });
+});
+
 
 const tiers = [
 
@@ -2835,6 +2959,148 @@ const tiers = [
 {name:"UNIX-CIRCLEDFINITY",value:"∮"},
 {name:"DUNIX-CIRCLEDFINITY",value:"∯"},
 {name:"TRIUNIX-CIRCLEDFINITY",value:"∰"},
+{name:"EXISTENSFINITY",value:"֍ · ∰ {[Ⓧ - ☉]} ∰"},
+{name:"NEVER EXISTENSFINITY",value:"֍ {[Ⓧ - 2]} ֍"},
+{name:"ALWAY EXISTENSFINITY",value:"֍ {[Ⓧ - 3]} ֍"},
+{name:"FOREVER EXISTENSFINITY",value:"֍ {[Ⓧ - 5]} ֍"},
+{name:"GIANTFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 10]} ֍"},
+{name:"SUPERFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 10^100]} ֍"},
+{name:"HYPERFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 10{100}10]} ֍"},
+{name:"MEGAFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - G64]} ֍"},
+{name:"GIGAFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - TREE(3)]} ֍"},
+{name:"ULTRAFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∞]} ֍"},
+{name:"TERAFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ω]} ֍"},
+{name:"SUPIFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ΩxΩ]} ֍"},
+{name:"HYPIFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - .IΩxXΩI.]} ֍"},
+{name:"MEGIFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ..IΩxXΩI..]} ֍"},
+{name:"GIGIFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ΩA]} ֍"},
+{name:"TERIFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 1Ω]} ֍"},
+{name:"ENDFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ω/Ω]} ֍"},
+{name:"ENDERFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ωπ]} ֍"},
+{name:"GOD ENDFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 田]} ֍"},
+{name:"GODDER ENDFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ө]} ֍"},
+{name:"MORE GODDER ENDFINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⊞]} ֍"},
+{name:"E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ①]} ֍"},
+{name:"S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - 𝖀]} ֍"},
+{name:"M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ꙍ]} ֍"},
+{name:"O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⅊]} ֍"},
+{name:"U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⅇ]} ֍"},
+{name:"G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⏦]} ֍"},
+{name:"A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Λ]} ֍"},
+{name:"T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ☉]} ֍"},
+{name:"N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⌺]} ֍"},
+{name:"S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♈︎]} ֍"},
+{name:"E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♉︎]} ֍"},
+{name:"G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♊︎]} ֍"},
+{name:"M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♋︎]} ֍"},
+{name:"E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♌︎]} ֍"},
+{name:"S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♍︎]} ֍"},
+{name:"M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♎︎]} ֍"},
+{name:"O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♏︎]} ֍"},
+{name:"U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♐︎]} ֍"},
+{name:"G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♑︎]} ֍"},
+{name:"A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♒︎]} ֍"},
+{name:"T.A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ♓︎]} ֍"},
+{name:"N.T.A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ‡]} ֍"},
+
+{name:"S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ɒ]} ֍"},
+{name:"E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ᴓ]} ֍"},
+{name:"G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ᴕ]} ֍"},
+{name:"M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ₪]} ֍"},
+{name:"E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ℘]} ֍"},
+{name:"S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ђ]} ֍"},
+{name:"M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ໂ]} ֍"},
+{name:"O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⊡]} ֍"},
+{name:"U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ▣]} ֍"},
+{name:"G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ■]} ֍"},
+{name:"A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ⟐]} ֍"},
+{name:"T.A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ωι]} ֍"},
+{name:"N.T.A.G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x2 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ψ]} ֍"},
+
+{name:"S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - P]} ֍"},
+{name:"E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - И]} ֍"},
+{name:"G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ͳ]} ֍"},
+{name:"M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - Ͱ]} ֍"},
+{name:"E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∫]} ֍"},
+{name:"S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∬]} ֍"},
+{name:"M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∭]} ֍"},
+{name:"O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∮]} ֍"},
+{name:"U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∯]} ֍"},
+{name:"G.U.O.M.S.E.M.G.E.S.N.T.A.G.U.O.M.S.E.M.G.E.x3 FINITE EXISTENSFINITY",value:"֍ {[Ⓧ - ∰]} ֍"},
+
+{name:"INFINITILFINITY",value:"⋈"},
+{name:"OMEGFINITY",value:"ᝆ"},
+{name:"PHILIFINITY",value:"ᝎ"},
+{name:"PETILFINITY",value:"Ⴉ"},
+{name:"KILOFINITY",value:"∟"},
+{name:"GIANTFINITY",value:"ℵ"},
+{name:"SUPERFINITY",value:"σ"},
+{name:"HYPERFINITY",value:"τ"},
+{name:"MEGAFINITY",value:"λ"},
+{name:"GIGAFINITY",value:"ђ"},
+{name:"ULTRAFINITY",value:"ʊ̶͒̑"},
+{name:"TERAFINITY",value:"-Ꙍ̴̄́-"},
+{name:"UNRELIAFINITY",value:"ᰟ"},
+{name:"INACCESSIFINITY",value:"ᦲ"},
+{name:"CARDINALFINITY",value:"Ꮚ"},
+{name:"ULTIMATE REBIRTHFINITY",value:"Ꮻ"},
+{name:"NEVERFINITY",value:"Φ"},
+{name:"ALWAYSFINITY",value:"⫷"},
+{name:"FOREVERFINITY",value:"Ⴔ"},
+{name:"BREAKFINITY",value:"ß"},
+{name:"LASTFINITY",value:"∂"},
+{name:"MULTIFINITY",value:"Þ"},
+{name:"UNKNOWNFINITY",value:"ƿ"},
+{name:"IMPOSSIBLEFINITY",value:"ʯ"},
+{name:"ULTIMAFINITY",value:"Ж"},
+{name:"TRUFINITY",value:"Ѭ"},
+{name:"UNBREAKABLE CARDINALFINITY",value:"ξ"},
+{name:"ENDINGFINITY",value:"𝔈"},
+
+{name:"NEVER ✪",value:"⍰"},
+{name:"Never Never",value:"ↇ x ↇ"},
+{name:"Ender Never",value:"ↇ x ↇ x ↇ"},
+{name:"Phrase 10 Finite - Never",value:"ↇ [px10] ↇ"},
+{name:"Phrase 100 Finite - Never",value:"ↇ [px100] ↇ"},
+{name:"Phrase Googol Finite-Never",value:"ↇ [px10^100] ↇ"},
+{name:"Phrase Boogol Finite-Never",value:"ↇ[px10{100}10]ↇ"},
+{name:"Phrase Graham's Number Finite-Never",value:"ↇ[pxG64]ↇ"},
+{name:"Phrase Tree(3) Finite-Never",value:"ↇ[pxTREE(3)]ↇ"},
+{name:"Phrase Infinity Finite-Never",value:"ↇ[px∞]ↇ"},
+{name:"Phrase Absolute Infinity Finite-Never",value:"ↇ[pxΩ]ↇ"},
+{name:"Phrase Absolute Eternal Finite-Never",value:"ↇ[pxθ]ↇ"},
+{name:"Phrase Terminus Finite-Never",value:"ↇ[px⨀]ↇ"},
+
+{name:"EVERYTHINGFINITY",value:"ↀ"},
+{name:"ALWAYFINITY",value:"ↂ"},
+{name:"UNREACHIFINITY",value:"ↆ"},
+{name:"EVERYTHING-UNREACHIFINITY",value:"ↆ⎰O/ ↆ⎱ↆ"},
+{name:"SUPER-UNREACHIFINITY",value:"ↆ⎰O / O / ↆ⎱ↆ"},
+{name:"MEGA-UNREACHIFINITY",value:"ↆ⎰O / O / O / ↆ⎱ↆ"},
+{name:"GIGA-UNREACHIFINITY",value:"ↆ⎰O x ↆ⎱ↆ"},
+{name:"TERA-UNREACHIFINITY",value:"ↆ⎰O xX ↆ⎱ↆ"},
+{name:"PETA-UNREACHIFINITY",value:"ↆ⎰O xX xX ↆ⎱ↆ"},
+{name:"EXA-UNREACHIFINITY",value:"ↆ⎰O (xX) ↆ⎱ↆ"},
+{name:"ZETTA-UNREACHIFINITY",value:"ↆ⎰O {xX} ↆ⎱ↆ"},
+{name:"YOTTA-UNREACHIFINITY",value:"ↆ⎰O [xX] ↆ⎱ↆ"},
+{name:"RONNA-UNREACHIFINITY",value:"ↆ⎰O/xX/ ↆ⎱ↆ"},
+{name:"QUETTA-UNREACHIFINITY",value:"ↆ⎰O |xX| ↆ⎱ↆ"},
+{name:"DEKA-UNREACHIFINITY / HENDA-UNREACHIFINITY",value:"ↆ⎰O .|xX|. ↆ⎱ↆ"},
+{name:"ENDEKA-UNREACHIFINITY / DOKA-UNREACHIFINITY",value:"ↆ⎰O ..|xX|.. ↆ⎱ↆ"},
+
+{name:"SULIFINITY",value:"𞥟"},
+{name:"DISIFINITY",value:"⦂"},
+{name:"TRISIFINITY",value:"⦡"},
+{name:"PENTIFINITY",value:"⥺"},
+{name:"ERRORIFINITY",value:"⦶"},
+{name:"UNIVERSIFINITY",value:"⦷"},
+{name:"MULTIVERSIFINITY",value:"⦻"},
+{name:"CLUBIFINITY",value:"⧉"},
+
+{name:"ARTHIFINITY",value:"⧍"},
+{name:"LIFEFINITY",value:"⧓"},
+{name:"BOXIFINITY",value:"⧠"},
+{name:"ARCHIFINITY",value:"⧢"}
 
 
 
@@ -2925,6 +3191,7 @@ const fNum=n=>{
 
   return n.m.toFixed(2)+"e"+n.e;
 };
+
 
 
 /* =========================================================
@@ -3214,11 +3481,6 @@ function mergeAll(){
           // Create next tier
           grid[b]=next;
 
-          // Give coins exactly like normal merging
-          coins=nAdd(
-            coins,
-            nPow(3,next)
-          );
 
           // Best tile
           if(next>maxTileInRun){
@@ -3314,6 +3576,7 @@ function clickTile(index){
     return;
 
   }
+
 
   /* =====================================================
      SAME TIER = NEXT GOOGOLOGISM
@@ -3531,8 +3794,8 @@ const bestData =
 document.body.style.background =
   `hsl(${bestTileAllTime - 1}, 35%, 50%)`;
 document.getElementById("s").innerText =
-  "Coins: " + fNum(coins) +
-  "\nYou get " + fNum(Income) + " coin(s) per second.";
+  "Coins: " + fNumRouter(coins) +
+  "\nYou get " + fNumRouter(Income) + " coin(s) per second.";
   /* =====================================================
      SPAWN
      ===================================================== */
@@ -3555,7 +3818,7 @@ document.getElementById("s").innerText =
 
   uBtn.innerText=
     "+1 BASE BLOCK (KOSZT: "+
-    fNum(cost)+
+    fNumRouter(cost)+
     ")";
 
   uBtn.disabled=
@@ -3683,6 +3946,10 @@ document.getElementById("s").innerText =
     }
   );
 
+document.getElementById("notationSelect").addEventListener("change", e => {
+  setNotationMode(e.target.value);
+  render();
+});
 
   /* =====================================================
      BEST TILE
