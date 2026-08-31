@@ -209,8 +209,35 @@ class U {
 
         // Roman table ONLY up to 3999 (no overlines)
         this.F = [
-            [1000, "M"],
-            [900,  "CM"],
+            // --- DOUBLE OVERLINE (millions) ---
+    [1000000000, "M\u033F\u033F"],   // 1,000,000,000
+    [900000000,  "C\u033F\u033F M\u033F\u033F"],
+    [500000000,  "D\u033F\u033F"],
+    [400000000,  "C\u033F\u033F D\u033F\u033F"],
+    [100000000,  "C\u033F\u033F"],
+    [90000000,   "X\u033F\u033F C\u033F\u033F"],
+    [50000000,   "L\u033F\u033F"],
+    [40000000,   "X\u033F\u033F L\u033F\u033F"],
+    [10000000,   "X\u033F\u033F"],
+    [9000000,    "M\u0305 X\u033F\u033F"],
+    [5000000,    "V\u033F\u033F"],
+    [4000000,    "M\u0305 V\u033F\u033F"],
+    [1000000,    "M\u0305"],
+
+    // --- SINGLE OVERLINE (thousands) ---
+    [900000,     "C\u0305 M\u0305"],
+    [500000,     "D\u0305"],
+    [400000,     "C\u0305 D\u0305"],
+    [100000,     "C\u0305"],
+    [90000,      "X\u0305 C\u0305"],
+    [50000,      "L\u0305"],
+    [40000,      "X\u0305 L\u0305"],
+    [10000,      "X\u0305"],
+    [9000,       "MX\u0305"],
+    [5000,       "V\u0305"],
+    [4000,       "MV\u0305"],
+    [1000, "M"],
+    [900,  "CM"],
             [500,  "D"],
             [400,  "CD"],
             [100,  "C"],
@@ -261,7 +288,7 @@ class U {
         let mantissa = n.m * Math.pow(10, remExp);
 
         // clamp mantissa into 1–3999 range
-        let intPart = Math.floor(mantissa % 4000);
+        let intPart = Math.floor(mantissa % 4000000000);
         if (intPart === 0) intPart = 1;
 
         let frac = mantissa - Math.floor(mantissa);
@@ -281,12 +308,12 @@ class U {
  
     
 formatExponent(exp) {
-    if (exp <= 3999) {
+    if (exp <= 3999999999) {
         return this.mapToRoman(exp);
     }
 
-    let base = exp % 4000;
-    let tier = Math.floor(exp / 4000);
+    let base = exp % 4000000000;
+    let tier = Math.floor(exp / 4000000000);
 
     let baseRoman = this.mapToRoman(base);
     let tierRoman = this.mapToRoman(tier);
