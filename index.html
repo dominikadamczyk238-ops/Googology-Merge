@@ -18,8 +18,8 @@ html,body {
 }
 
 body {
-  background:rgb(0,0,253);
-  color:white;
+  background: hsl(calc(240deg + var(--tier) - 1deg), 100%, 50%);
+  color:rgba(255, 255, 255, 0.858);
   font-weight:700;
   display:flex;
   flex-direction:column;
@@ -176,7 +176,10 @@ button:active { transform:scale(.96); }
 
 <body>
 
-<div id="s">MONETY: 0</div>
+<div id="s">
+  MONETY: 0<br>
+  You get 0 coin(s) per second
+</div>
 <div id="p">SPAWN KAFELKÓW: TIER 1</div>
 
 <div class="controls">
@@ -2544,6 +2547,206 @@ const tiers = [
   {name:"INACCESSIBLEFINITY",value:"⏦"},
   {name:"ABSILITY",value:"Λ"},
   {name:"TERMINUSFINITY",value:"☉"}
+{name:"TERMINUSFINITY",value:"☉"},
+{name:"DOUBLE TERMINUSFINITY",value:"☉/☉"},
+{name:"TRIPLE TERMINUSFINITY",value:"☉/☉/☉"},
+{name:"SYMBOLFINITY",value:"⌺"},
+{name:"ARIESFINITY",value:"♈︎"},
+{name:"TAURUSFINITY",value:"♉︎"},
+{name:"TAURUS INFINIFINITY",value:"[♉︎]/[𝖀] ♉︎ ♉︎"},
+{name:"TAURUS FINAL INFINITY",value:"[♉︎]/[Ꙍ]"},
+{name:"TAURUS ENDFINITY",value:"[♉︎]/[⅊]"},
+{name:"TAURUS ETERNALFINITY",value:"[♉︎]/[ⅇ]"},
+{name:"TAURUS INACCESSIBLEFINITY",value:"[♉︎]/[⏦]"},
+{name:"TAURUS ABSILITY",value:"[♉︎]/[Λ]"},
+{name:"TAURUS TERMINUSFINITY",value:"[♉︎]/[☉]"},
+{name:"TAURUS SYMBOLFINITY",value:"[♉︎]/[⌺]"},
+{name:"TAURUS ARIESFINITY",value:"[♉︎]/[♈︎]"},
+{name:"SQUARED TAURUSFINITY",value:"[♉︎]/[♉︎]"},
+{name:"CUBIC TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]"},
+{name:"TESSERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"PENTERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"HEXERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"HEPTERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"OCTERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"ENNERACT TAURUSFINITY",value:"[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]/[♉︎]"},
+{name:"GEMINIFINITY",value:"♊︎ "},
+{name:"SQUARED GEMINIFINITY",value:"[♊︎]/[♊︎]"},
+{name:"CUBIC GEMINIFINITY",value:"[♊︎]/[♊︎]/[♊︎]"},
+{name:"TESSERACT GEMINIFINITY",value:"[♊︎]/[♊︎]/[♊︎]/[♊︎]"},
+{name:"PENTERACT GEMINIFINITY",value:"[♊︎]/[♊︎]/[♊︎]/[♊︎]/[♊︎]"},
+{name:"CANCERFINITY",value:"♋︎ "},
+{name:"LEOFINITY",value:"♌︎ "},
+{name:"VIRGOFINITY",value:"♍︎ "},
+{name:"LIBRAFINITY",value:"♎︎"},
+{name:"SCORPIOFINITY",value:"♏︎"},
+{name:"SAGITTARIUSFINITY",value:"♐︎"},
+{name:"CAPRICORNFINITY",value:"♑︎"},
+{name:"AQUARIUSFINITY",value:"♒︎"},
+{name:"PISCESFINITY",value:"♓︎"},
+{name:"SQUAREDFINITE PISCESFINITY",value:"[♓︎]/[♓︎]"},
+{name:"CUBICFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]"},
+{name:"TESSERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"PENTERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"HEXERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"HEPTERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"OCTERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"ENNERACTFINITE PISCESFINITY",value:"[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]/[♓︎]"},
+{name:"INPREDICTAFINITY",value:"☆ ‡"},
+{name:"DOUBLEFINITE INPREDICTAFINITY",value:"[‡] [2]"},
+{name:"TRIPLEFINITE INPREDICTAFINITY",value:"[‡] [3]"},
+{name:"QUINTUPLEFINITE INPREDICTAFINITY",value:"[‡] [5]"},
+{name:"DECUPLEFINITE INPREDICTAFINITY",value:"[‡] [10]"},
+{name:"CENTUPLEFINITE INPREDICTAFINITY",value:"[‡] [100]"},
+{name:"GOOGOL-UPLEFINITE INPREDICTAFINITY",value:"[‡] [10^100]"},
+{name:"BOOGOL-UPLEFINITE INPREDICTAFINITY",value:"[‡] [10{100}10]"},
+{name:"GRAHAM-UPLEFINITE INPREDICTAFINITY",value:"[‡] [G64]"},
+{name:"TREE(3)-UPLEFINITE INPREDICTAFINITY",value:"[‡] [TREE(3)]"},
+{name:"INFINITUPLEFINITE INPREDICTAFINITY",value:"[‡] [∞]"},
+{name:"ABSOLUTE INFINITUPLEFINITE INPREDICTAFINITY",value:"[‡] [Ω]"},
+{name:"NEVER INPREDICTAFINITY",value:"‡ ‡"},
+{name:"ENDER INPREDICTAFINITY",value:"‡ ‡ ‡"},
+{name:"GOD END INPREDICTAFINITY",value:"‡ ‡ ‡ ‡ ‡ ‡ {x^5} ‡ ‡ xX 5"},
+{name:"GODDER ENDING INPREDICTAFINITY",value:"‡ {x^10} ‡"},
+{name:"MORE GODDER ENDING INPREDICTAFINITY",value:"‡ {x^100} ‡"},
+{name:"EVEN MORE GODDER ENDING INPREDICTAFINITY",value:"‡ {x^10^100} ‡"},
+{name:"SUPER EVEN MORE GODDER ENDING INPREDICTAFINITY",value:"‡ {x^10{100}10} ‡"},
+{name:"MEGA SUPER EVEN MORE GODDER ENDING INPREDICTAFINITY",value:"‡ {x^G64} ‡"},
+{name:"OMEGA MEGA SUPER EVEN MORE GODDER ENDING INPREDICTAFINITY",value:"‡ {x^TREE(3)} ‡"},
+{name:"INSTAFINITY",value:"Ɒ"},
+{name:"CORRUPFINITY",value:"ᴓ "},
+{name:"SUPIFINITY",value:"ᴕ"},
+{name:"MEGIFINITY",value:"₪"},
+{name:"GIGIFINITY",value:"℘"},
+{name:"ULTRIFINITY",value:"Ђ"},
+{name:"TRUIFINITY",value:"ໂ"},
+{name:"TERIFINITY",value:"Ⳃ"},
+{name:"TERMIFINITY",value:"⊡"},
+{name:"ABSOLUTE TERMIFINITY",value:"▣"},
+{name:"FULL TERMIFINITY",value:"■"},
+{name:"UNIFINITY",value:"⟐"},
+{name:"NEVER UNIFINITY",value:"⟐ x ⟐"},
+{name:"ALWAY UNIFINITY",value:"⟐ {x^⟐} ⟐"},
+{name:"NEVER ALWAY UNIFINITY",value:"⟐ {x^⟐ x ⟐} ⟐"},
+{name:"FOREVER UNIFINITY",value:"⟐ {x{^x⟐}} ⟐"},
+{name:"NEVER FOREVER UNIFINITY",value:"⟐ {x{^x⟐ x ⟐}} ⟐"},
+{name:"ALWAY FOREVER UNIFINITY",value:"⟐ {x{^x⟐ {x^⟐} ⟐}} ⟐"},
+{name:"NEVER ALWAY FOREVER UNIFINITY",value:"⟐ {x{^x⟐ {x^⟐ x ⟐} ⟐}} ⟐"},
+{name:"ALWAY ALWAY FOREVER UNIFINITY",value:"⟐ {x{^x⟐ {x^⟐ {x^⟐} ⟐} ⟐}} ⟐"},
+{name:"FOREVER FOREVER UNIFINITY",value:"⟐ {x{^x⟐ {x{^x⟐}} ⟐}} ⟐"},
+{name:"GIANTFINITE UNIFINITY",value:"⟐ {x{^{xX⟐}}} ⟐"},
+{name:"HUGEFINITE UNIFINITY",value:"⟐ {(x+^) x⟐} ⟐"},
+{name:"SUPERFINITE UNIFINITY",value:"⟐ {((x+^)xX⟐) x⟐} ⟐"},
+{name:"HYPERFINITE UNIFINITY",value:"⟐ {{(x+^)xX⟐} x⟐} ⟐"},
+{name:"MEGAFINITE UNIFINITY",value:"⟐ {[(x+^)xX⟐] x⟐} ⟐"},
+
+{name:"Omega-Prosgegrammenifinity",value:"Ωι"},
+{name:"NEVER OMEGA-PROSGEGRAMMENIFNITY",value:"Ωι x Ωι"},
+{name:"OMEGA-OXIAFINITY",value:"ˊΩ"},
+{name:"OMEGA-VARIAFINITY",value:"`Ω"},
+{name:"OMICRON-OXIAFINITY",value:"ˊO"},
+{name:"OMICRON-VARIAFINITY",value:"`O"},
+{name:"RHO-DASIAFINITY",value:"`P"},
+{name:"UPSILON-OXIAFINITY",value:"ˊY"},
+{name:"UPSILON-VARIAFINITY",value:"`Y"},
+{name:"UPSILON-MACRONFINITY",value:"Ȳ"},
+{name:"UPSILON-VRACHYFINITY",value:"Y̆"},
+{name:"IOTA-OXIAFINITY",value:"ˊI"},
+{name:"IOTA-VARIAFINITY",value:"`I"},
+{name:"IOTA-MACRONFINITY",value:"Ī"},
+{name:"IOTA-VRACHYFINITY",value:"Ĭ"},
+{name:"ETA-PROSGEGRAMMENIFINITY",value:"Hι"},
+{name:"ETA-OXIAFINITY",value:"ˊE"},
+{name:"ETA-VARIAFINITY",value:"`E"},
+{name:"EPSILON-OXIAFINITY",value:"Ē"},
+{name:"EPSILON-VARIAFINITY",value:"Ĕ"},
+{name:"ALPHA-PROSGEGRAMMENIFINITY",value:"Aι"},
+{name:"ALPHA-OXIAFINITY",value:"ˊA"},
+{name:"ALPHA-VARIAFINITY",value:"`A"},
+{name:"ALPHA-MACRONFINITY",value:"Ā"},
+{name:"ALPHA-VRACHYFINITY",value:"Ă"},
+
+{name:"OMEGA-DASIA-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"ᾮ"},
+{name:"OMEGA-PSILI-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"ᾭ"},
+{name:"OMEGA-DASIA-OXIA-PROSGEGRAMMENIFINITY",value:"ᾬ"},
+{name:"OMEGA-PSILI-OXIA-PROSGEGRAMMENIFINITY",value:"ᾫ"},
+{name:"OMEGA-DASIA-VARIA-PROSGEGRAMMENIFINITY",value:"ᾪ"},
+{name:"OMEGA-PSILI-VARIA-PROSGEGRAMMENIFINITY",value:"ᾪ"},
+{name:"OMEGA-DASIA-PROSGEGRAMMENIFINITY",value:"ᾩ"},
+{name:"OMEGA-PSILI-PROSGEGRAMMENIFINITY",value:"ᾨ"},
+
+{name:"ETA-DASIA-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"Ἧ"},
+{name:"ETA-PSILI-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"Ἦ"},
+{name:"ETA-DASIA-OXIA-PROSGEGRAMMENIFINITY",value:"Ἥ"},
+{name:"ETA-PSILI-OXIA-PROSGEGRAMMENIFINITY",value:"Ἤ"},
+{name:"ETA-DASIA-VARIA-PROSGEGRAMMENIFINITY",value:"Ἣ"},
+{name:"ETA-PSILI-VARIA-PROSGEGRAMMENIFINITY",value:"Ἢ"},
+{name:"ETA-DASIA-PROSGEGRAMMENIFINITY",value:"Ἡ"},
+{name:"ETA-PSILI-PROSGEGRAMMENIFINITY",value:"Ἠ"},
+
+{name:"ALPHA-DASIA-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"Ἇ"},
+{name:"ALPHA-PSILI-PERISPOMENI-PROSGEGRAMMENIFINITY",value:"Ἆ"},
+{name:"ALPHA-DASIA-OXIA-PROSGEGRAMMENIFINITY",value:"Ἅ"},
+{name:"ALPHA-PSILI-OXIA-PROSGEGRAMMENIFINITY",value:"Ἄ"},
+{name:"ALPHA-DASIA-VARIA-PROSGEGRAMMENIFINITY",value:"Ἃ"},
+{name:"ALPHA-PSILI-VARIA-PROSGEGRAMMENIFINITY",value:"Ἂ"},
+{name:"ALPHA-DASIA-PROSGEGRAMMENIFINITY",value:"Ἁ"},
+{name:"ALPHA-PSILI-PROSGEGRAMMENIFINITY",value:"Ἀ"},
+
+{name:"OMEGA-DASIA-PERISPOMENIFINITY",value:"Ὧ"},
+{name:"OMEGA-PSILI-PERISPOMENIFINITY",value:"Ὦ"},
+{name:"OMEGA-DASIA-OXIAFINITY",value:"Ὥ"},
+{name:"OMEGA-PSILI-OXIAFINITY",value:"Ὤ"},
+{name:"OMEGA-DASIA-VARIAFINITY",value:"Ὣ"},
+{name:"OMEGA-PSILI-VARIAFINITY",value:"Ὢ"},
+{name:"OMEGA-DASIAFINITY",value:"Ὡ"},
+{name:"OMEGA-PSILIFINITY",value:"Ὠ"},
+
+{name:"UPSILON-DASIA-PROGEGRAMMENIFINITY",value:"Ὗ"},
+{name:"UPSILON-VARIA-OXIAFINITY",value:"Ὕ"},
+{name:"UPSILON-VARIA-VARIAFINITY",value:"Ὓ"},
+{name:"UPSILON-DASIAFINITY",value:"Ὑ"},
+
+{name:"OMICRON-DASIA-OXIAFINITY",value:"Ὅ"},
+{name:"OMICRON-PSILI-OXIAFINITY",value:"Ὄ"},
+{name:"OMICRON-DASIA-VARIAFINITY",value:"Ὃ"},
+{name:"OMICRON-PSILI-VARIAFINITY",value:"Ὂ"},
+{name:"OMICRON-DASIAFINITY",value:"Ὁ"},
+{name:"OMICRON-PSILIFINITY",value:"Ὀ"},
+
+{name:"IOTA-DASIA-PERISPOMENIFINITY",value:"Ἷ"},
+{name:"IOTA-PSILI-PERISPOMENIFINITY",value:"Ἶ"},
+{name:"IOTA-DASIA-OXIAFINITY",value:"Ἵ"},
+{name:"IOTA-PSILI-OXIAFINITY",value:"Ἴ"},
+{name:"IOTA-DASIA-VARIAFINITY",value:"Ἳ"},
+{name:"IOTA-PSILI-VARIAFINITY",value:"Ἲ"},
+{name:"IOTA-DASIAFINITY",value:"Ἱ"},
+{name:"IOTA-PSILIFINITY",value:"Ἰ"},
+
+{name:"ETA-DASIA-PERISPOMENIFINITY",value:"Ἧ"},
+{name:"ETA-PSILI-PERISPOMENIFINITY",value:"Ἦ"},
+{name:"ETA-DASIA-OXIAFINITY",value:"Ἥ"},
+{name:"ETA-PSILI-OXIAFINITY",value:"Ἤ"},
+{name:"ETA-DASIA-VARIAFINITY",value:"Ἣ"},
+{name:"ETA-PSILI-VARIAFINITY",value:"Ἢ"},
+{name:"ETA-DASIAFINITY",value:"Ἡ"},
+{name:"ETA-PSILIFINITY",value:"Ἠ"},
+
+{name:"EPSILON-DASIA-OXIAFINITY",value:"Ἕ"},
+{name:"EPSILON-PSILI-OXIAFINITY",value:"Ἔ"},
+{name:"EPSILON-DASIA-VARIAFINITY",value:"Ἓ"},
+{name:"EPSILON-PSILI-VARIAFINITY",value:"Ἒ"},
+{name:"EPSILON-DASIAFINITY",value:"Ἑ"},
+{name:"EPSILON-PSILIFINITY",value:"Ἐ"},
+
+{name:"ALPHA-DASIA-PERISPOMENIFINITY",value:"Ἇ"},
+{name:"ALPHA-PSILI-PERISPOMENIFINITY",value:"Ἆ"},
+{name:"ALPHA-DASIA-OXIAFINITY",value:"Ἅ"},
+{name:"ALPHA-PSILI-OXIAFINITY",value:"Ἄ"},
+{name:"ALPHA-DASIA-VARIAFINITY",value:"Ἃ"},
+{name:"ALPHA-PSILI-VARIAFINITY",value:"Ἂ"},
+{name:"ALPHA-DASIAFINITY",value:"Ἁ"},
+{name:"ALPHA-PSILIFINITY",value:"Ἀ"},
 
 
 
@@ -2756,7 +2959,7 @@ function getCost(){
     );
 
   return nNew(
-    power.m*10000/(upgradeTier/1000+1),
+    power.m*10000/Math.log(upgradeTier*(Math.log(upgradeTier*10+1))),
     power.e
   );
 
@@ -3039,12 +3242,6 @@ function clickTile(index){
 
     grid[from]=0;
     grid[index]=next;
-
-    coins=nAdd(
-      coins,
-      nPow(3,next)
-    );
-
     if(
       next>maxTileInRun
     ){
@@ -3238,19 +3435,16 @@ function render(){
 
   const cost=
     getCost();
+const bestData =
+  tiers[
+    bestTileAllTime - 1
+  ];
 
-
-  /* =====================================================
-     COINS
-     ===================================================== */
-
-  document.getElementById(
-    "s"
-  ).innerText=
-    "MONETY: "+
-    fNum(coins);
-
-
+document.body.style.background =
+  `hsl(${bestTileAllTime - 1}, 35%, 50%)`;
+document.getElementById("s").innerText =
+  "Coins: " + fNum(coins) +
+  "\nYou get " + fNum(Income) + " coin(s) per second.";
   /* =====================================================
      SPAWN
      ===================================================== */
@@ -3406,10 +3600,6 @@ function render(){
      BEST TILE
      ===================================================== */
 
-  const bestData=
-    tiers[
-      bestTileAllTime-1
-    ];
 
 
   document.getElementById(
@@ -3434,24 +3624,27 @@ function render(){
 /* =========================================================
    PASSIVE COINS
    ========================================================= */
+let Income = {
+  m: 0,
+  e: 0
+};
 
-setInterval(()=>{
+setInterval(() => {
 
-  let income={
-    m:0,
-    e:0
+  Income = {
+    m: 0,
+    e: 0
   };
 
-
   grid.forEach(
-    tier=>{
+    tier => {
 
-      if(tier>0){
+      if (tier > 0) {
 
-        income=
+        Income =
           nAdd(
-            income,
-            nPow(3,tier)
+            Income,
+            nPow(2.999, tier)
           );
 
       }
@@ -3459,18 +3652,16 @@ setInterval(()=>{
     }
   );
 
-
-  coins=
+  coins =
     nAdd(
       coins,
-      income
+      Income
     );
-
 
   save();
   render();
 
-},1000);
+}, 1000);
 
 
 /* =========================================================
