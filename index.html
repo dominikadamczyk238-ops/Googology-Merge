@@ -119,8 +119,8 @@ button:active { transform:scale(.96); }
   text-shadow:
     0 2px 3px rgba(0,0,0,.8),
     0 0 5px rgba(0,0,0,.5);
-}
 
+}
 .tile:hover {
   transform:scale(1.025);
   filter:brightness(1.1);
@@ -201,141 +201,118 @@ button:active { transform:scale(.96); }
 </body>
 
 <script>
-
-class U {
- 
+class Roman {
 
     constructor() {
+        // stałe AD
+        this.z = 4e9;
+        this.B = Math.log10(this.z);
 
-        // Roman table ONLY up to 3999 (no overlines)
+        // frakcje AD (ułamki)
+        this.frac = [
+    "",   // 0
+    "·",  // 1
+    ":",  // 2
+    "∴",  // 3
+    "∷",  // 4
+    "⁙",  // 5
+    "S",  // 6
+    "S·", // 7
+    "S:", // 8
+    "S∴", // 9
+    "S∷", // 10
+    "S⁙"  // 11
+];
+
+
+        // ⭐ TWOJA TABELA F — rozszerzona o podwójne i potrójne overline
         this.F = [
-            // --- DOUBLE OVERLINE (millions) ---
-    [1000000000, "M\u033F"],   // 1,000,000,000
-    [900000000,  "C\u033FM\u033F"],
-    [500000000,  "D\u033F"],
-    [400000000,  "C\u033FD\u033F"],
-    [100000000,  "C\u033F"],
-    [90000000,   "X\u033FC\u033F"],
-    [50000000,   "L\u033F"],
-    [40000000,   "X\u033FL\u033F"],
-    [10000000,   "X\u033F"],
-    [9000000,    "M\u0305X\u033F"],
-    [5000000,    "V\u033F"],
-    [4000000,    "M\u0305V\u033F"],
-    [1000000,    "M\u0305"],
+            // potrójne overline (10^9)
+            [1e9, "M̿"], [9e8, "C̿M̿"], [5e8, "D̿"], [4e8, "C̿D̿"], [1e8, "C̿"],
+            [9e7, "X̿C̿"], [5e7, "L̿"], [4e7, "X̿L̿"], [1e7, "X̿"],
+            [9e6, "M̿X̿"], [5e6, "V̿"], [4e6, "MV̿"],
 
-    // --- SINGLE OVERLINE (thousands) ---
-    [900000,     "C\u0305M\u0305"],
-    [500000,     "D\u0305"],
-    [400000,     "C\u0305D\u0305"],
-    [100000,     "C\u0305"],
-    [90000,      "X\u0305C\u0305"],
-    [50000,      "L\u0305"],
-    [40000,      "X\u0305L\u0305"],
-    [10000,      "X\u0305"],
-    [9000,       "MX\u0305"],
-    [5000,       "V\u0305"],
-    [4000,       "MV\u0305"],
-    [1000, "M"],
-    [900,  "CM"],
-            [500,  "D"],
-            [400,  "CD"],
-            [100,  "C"],
-            [90,   "XC"],
-            [50,   "L"],
-            [40,   "XL"],
-            [10,   "X"],
-            [9,    "IX"],
-            [5,    "V"],
-            [4,    "IV"],
-            [1,    "I"]
+            // podwójne overline (10^6)
+            [1e6, "M̄"], [9e5, "C̄M̄"], [5e5, "D̄"], [4e5, "C̄D̄"], [1e5, "C̄"],
+            [9e4, "X̄C̄"], [5e4, "L̄"], [4e4, "X̄L̄"], [1e4, "X̄"],
+            [9e3, "M̄X̄"], [5e3, "V̄"], [4e3, "MV̄"],
+
+            // zwykłe rzymskie
+            [1e3, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+            [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+            [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
         ];
-
-        this.frac = ["", "·", ":", "∴", "∷", "⁙"];
     }
 
-    mapToRoman(n) {
+    // -----------------------------
+    // ⭐ AD Romanize — 1:1
+    // -----------------------------
+    romanize(t) {
         let out = "";
-        for (const [v, r] of this.F) {
-            while (n >= v) {
-                out += r;
-                n -= v;
+
+        // część główna (odejmowanie z F)
+        for (const [value, symbol] of this.F) {
+            while (t >= value) {
+                out += symbol;
+                t -= value;
             }
         }
+
+        // część ułamkowa (AD logic)
+        let a = Math.round(1.2 * Math.floor(10 * t));
+
+        if (a === 0) {
+            return out === "" ? "nulla" : out;
+        }
+
+        if (a > 5) {
+           
+            out += this.frac[a];
+        }else {
+            out += this.frac[a];
+        }
+
         return out;
     }
 
-    fracPart(x) {
-        let t = Math.round(x * 12);
-
-        if (t === 0) return "";
-        if (t === 12) return ""; // full unit
-
-        if (t < 6) return this.frac[t];
-        return "S" + this.frac[t - 6];
-    }
-
+    // -----------------------------
+    // ⭐ formatDecimal — AD T‑tower
+    // przepisany na {m,e}
+    // -----------------------------
     formatDecimal(n) {
-        if (n.m === 0) return "O";
+        // n = {m:number, e:number}
 
-        // exponent = floor(e / 9)
-        let exp = Math.floor(n.e / 9);
+        // wartość liczby
+        const value = n.m * Math.pow(10, n.e);
 
-        // leftover exponent
-        let remExp = n.e % 9;
-
-        // mantissa scaled by leftover exponent
-        let mantissa = n.m * Math.pow(10, remExp);
-
-        // clamp mantissa into 1–3999 range
-        let intPart = Math.floor(mantissa % 4000000000);
-        if (intPart === 0) intPart = 1;
-
-        let frac = mantissa - Math.floor(mantissa);
-
-        // Roman mantissa
-        let romanMantissa = this.mapToRoman(intPart);
-
-        if (frac > 0 && frac < 1) {
-            romanMantissa += this.fracPart(frac);
+        // jeśli < z → zwykły Roman (AD logic)
+        if (value < this.z) {
+            return this.romanize(value);
         }
 
-        // Roman exponent
-               let romanExp = this.formatExponent(exp);
-        return romanMantissa + "^" + romanExp;
-   }   
-     
- 
-    
-formatExponent(exp) {
-    if (exp <= 3999999999) {
-        return this.mapToRoman(exp);
+        // log10(n) = log10(m) + e
+        const log10 = Math.log10(n.m) + n.e;
+
+        // N = log10 / B (AD logic)
+        const N = log10 / this.B;
+
+        // r = z^(N - floor(N)) (AD logic)
+        const r = Math.pow(this.z, N - Math.floor(N));
+
+        // Roman(r) + T + Roman(N) (rekurencja AD)
+        return this.romanize(r) + "↑" + this.formatDecimal({
+            m: N,
+            e: 0
+        });
     }
-
-    let base = exp % 4000000000;
-    let tier = Math.floor(exp / 4000000000);
-
-    let baseRoman = this.mapToRoman(base);
-    let tierRoman = this.mapToRoman(tier);
-
-    return baseRoman + "^" + tierRoman;
 }
-
-      
-
-
-
-    get name() {
-        return "Roman";
-    }
-  }
 
 
 
 function setNotationMode(mode) {
   notationMode = mode;
 }
-const RomanFormatter = new U();
+const RomanFormatter = new Roman();
 let notationMode = "scientific";
 function fNumRouter({m,e}) {
   if (notationMode === "roman") {
@@ -3400,6 +3377,10 @@ function save(){
    TIER COLORS
    ========================================================= */
 
+/* =========================================================
+   TIER COLORS & STYLES (NOWY PODZIAŁ ERY)
+   ========================================================= */
+
 function tierColor(tier){
 
   // Up to 720 → normal HSL color
@@ -3407,7 +3388,7 @@ function tierColor(tier){
     const hue = (((tier - 1) % 360) + 1) * 5;
     return `hsl(${hue},100%,50%)`;
   }
-
+else if (tier > 720 && tier < 1400) {
   // After 720 → gradient based on hue
   const hue = (((tier - 1) % 360) + 1) * 5;
 
@@ -3416,7 +3397,35 @@ function tierColor(tier){
 
   return `linear-gradient(90deg, ${c1}, ${c2})`;
 }
+else if (tier > 1400 && tier < 2100) {
+  // After 720 → gradient based on hue
+  const hue = (((tier - 1) % 360) + 1) * 5;
 
+  const c1 = `hsl(${hue},100%,50%)`;
+  const c2 = `hsl(${(hue - 45) % 360},100%,50%)`;
+
+  return `linear-gradient(90deg, ${c1}, ${c2})`;
+}
+else if (tier > 2100 && tier < 2800) {
+  // After 720 → gradient based on hue
+  const hue = (((tier - 1) % 360) + 1) * 5;
+
+  const c1 = `hsl(${hue},100%,50%)`;
+  const c2 = `hsl(${(hue - 45) % 360},100%,50%)`;
+
+  return `linear-gradient(135deg, ${c1}, ${c2})`;
+}
+else if (tier > 2800 && tier < 3500) {
+  // After 720 → gradient based on hue
+  const hue = (((tier - 1) % 360) + 1) * 5;
+
+  const c1 = `hsl(${hue},100%,50%)`;
+  const c2 = `hsl(${(hue + 45) % 360},100%,50%)`;
+
+  return `linear-gradient(135deg, ${c1}, ${c2})`;
+}
+
+}
 
 /* =========================================================
    BOARD
@@ -4011,38 +4020,33 @@ let Income = {
   e: 0
 };
 
+
+
+/* =========================================================
+   PASSIVE COINS (200ms)
+   ========================================================= */
 setInterval(() => {
+  Income = { m: 0, e: 0 };
 
-  Income = {
-    m: 0,
-    e: 0
-  };
-
-  grid.forEach(
-    tier => {
-
-      if (tier > 0) {
-
-        Income =
-          nAdd(
-            Income,
-            nPow(2.999, tier)
-          );
-
-      }
-
+  grid.forEach(tier => {
+    if (tier > 0) {
+      Income = nAdd(Income, nPow(2.999, tier));
     }
-  );
+  });
 
-  coins =
-    nAdd(
-      coins,
-      Income
-    );
+  coins = nAdd(coins, Income);
 
+}, 1000);
+
+setInterval(() => {
   save();
+ 
+}, 1000);
+/* =========================================================
+   RENDER + SAVE (1000ms)
+   ========================================================= */
+setInterval(() => {
   render();
-
 }, 1000);
 
 
@@ -4056,12 +4060,10 @@ if(
   )
 ){
 
-  fillBoard();
 
-}
 
 fillBoard();
-
+}
 save();
 
 render();
