@@ -80,6 +80,11 @@ button {
   color:white;
 }
 
+#prestigeBtn, #spawnPrestigeBtn {
+  background:#f7b731;
+  color:#1c1c24;
+}
+
 button:hover { transform:scale(1.04); }
 button:active { transform:scale(.96); }
 
@@ -137,6 +142,16 @@ button:active { transform:scale(.96); }
   box-shadow:0 0 20px white;
 }
 
+.prestige-tile {
+  min-height:90px;
+  border:1px solid rgba(255,255,255,.2);
+}
+
+.prestige-tile.empty {
+  background:#282833;
+  cursor:default;
+}
+
 .tile-name {
   font-size:13px;
   line-height:1.15;
@@ -185,10 +200,12 @@ button:active { transform:scale(.96); }
 <div class="controls">
   <button id="uBtn" onclick="buyUpgrade()">+1 BASE BLOCK</button>
   <button id="resetBtn" onclick="resetGame()">RESET RUN</button>
+  <button id="prestigeBtn" onclick="prestige()">PRESTIGE</button>
 </div>
 <select id="notationSelect">
   <option value="scientific">Scientific (default)</option>
   <option value="roman">Roman</option>
+  <option value="chemical">Chemical</option>
 </select>
 
 <div id="g"></div>
@@ -196,6 +213,60 @@ button:active { transform:scale(.96); }
 <div class="leaderboard">
   <h3>🏆 TWÓJ REKORD RUNU</h3>
   <div id="leaderboardList">Najlepszy kafel: Tier 1</div>
+</div>
+<!-- PRESTIGE TABS -->
+<div class="controls" style="margin-top:20px;">
+  <button onclick="showTab('normal')">NORMAL</button>
+  <button onclick="showTab('pboard')">PRESTIGE BOARD</button>
+  <button onclick="showTab('pupgrades')">PRESTIGE UPGRADES</button>
+</div>
+
+<!-- NORMAL TAB -->
+<div id="tab-normal">
+  <!-- nic nie zmieniam, to jest Twoja gra -->
+</div>
+
+<!-- PRESTIGE BOARD TAB -->
+<div id="tab-pboard" style="display:none; width:100%; max-width:600px;">
+  <h2>Prestige Board</h2>
+
+  <div id="prestigeBoard"
+      style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px;">
+  </div>
+
+  <div id="prestigeBoardBoost"
+       style="margin-top:15px; font-size:18px;">
+    Prestige Board Boost: x1
+  </div>
+  <button id="spawnPrestigeBtn" onclick="spawnPrestigeMergent()"
+          style="margin-top:15px;">SPAWN PRESTIGE MERGENT (1 PP)</button>
+</div>
+
+<!-- PRESTIGE UPGRADES TAB -->
+<div id="tab-pupgrades" style="display:none; width:100%; max-width:600px;">
+  <h2>Prestige Upgrades</h2>
+
+  <div id="prestigeUpgradeInfo"
+       style="margin-top:10px; font-size:18px; white-space:pre-line;">
+    PP: 0
+    Upgrades: 0
+    Next Cost: 2 PP
+  </div>
+
+  <button onclick="buyPrestigeUpgrade()"
+          style="margin-top:15px; background:#981eef; color:#1c1c24;">
+    Buy +1 Tier
+  </button>
+
+  <div id="prestigeMergentUpgradeInfo"
+       style="margin-top:10px; font-size:18px; white-space:pre-line;">
+    Mergent Upgrades: 0
+    Next Cost: 6 PP
+  </div>
+  <button onclick="buyPrestigeMergentUpgrade()"
+          style="margin-top:15px; background:#981eef; color:#1c1c24;">
+    Upgrade Prestige Mergents
+  </button>
 </div>
 
 </body>
@@ -230,7 +301,7 @@ class Roman {
             // potrójne overline (10^9)
             [1e9, "M̿"], [9e8, "C̿M̿"], [5e8, "D̿"], [4e8, "C̿D̿"], [1e8, "C̿"],
             [9e7, "X̿C̿"], [5e7, "L̿"], [4e7, "X̿L̿"], [1e7, "X̿"],
-            [9e6, "M̿X̿"], [5e6, "V̿"], [4e6, "MV̿"],
+            [9e6, "M̿X̿"], [5e6, "V̿"], [4e6, "M̄V̿"],
 
             // podwójne overline (10^6)
             [1e6, "M̄"], [9e5, "C̄M̄"], [5e5, "D̄"], [4e5, "C̄D̄"], [1e5, "C̄"],
@@ -306,7 +377,53 @@ class Roman {
         });
     }
 }
+class Chemical {
+  /* =========================================================
+   CHEMICAL / ELEMENT NOTATION
+   ========================================================= */
+  static formatChemicalNumber(value) {
+    if (value == null) return "0.00";
 
+    // Supports the game's {m,e} values and break_eternity/break_infinity objects.
+    let exponent = Number(value.e ?? value.exponent);
+    let mantissa = Number(value.m ?? value.mantissa);
+    if (!Number.isFinite(exponent) || !Number.isFinite(mantissa)) {
+      const logarithm = typeof value.log10 === "function" ? Number(value.log10()) : NaN;
+      if (!Number.isFinite(logarithm)) return "0.00";
+      exponent = Math.floor(logarithm);
+      mantissa = Math.pow(10, logarithm - exponent);
+    }
+    if (mantissa === 0) return "0.00";
+
+    const step = Math.floor(exponent / 3);
+    const scaledMantissa = mantissa * Math.pow(10, exponent - step * 3);
+    let suffix = "";
+
+    if (step >= 1 && step <= Chemical.chemicalElements.length) {
+      suffix = Chemical.chemicalElements[step - 1];
+    } else if (step > Chemical.chemicalElements.length) {
+      // step 119 is H-H; subsequent values are a base-118 counter.
+      let index = step - Chemical.chemicalElements.length - 1;
+      const base = Chemical.chemicalElements.length;
+      const right = index % base;
+      const left = Math.floor(index / base);
+      suffix = `${Chemical.chemicalElements[left]}-${Chemical.chemicalElements[right]}`;
+    }
+
+    return `${scaledMantissa.toFixed(2)}${suffix ? " " + suffix : ""}`;
+  }
+}
+
+Chemical.chemicalElements = [
+  "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
+  "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
+  "Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd",
+  "Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
+  "Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm",
+  "Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
+];
+
+const formatChemicalNumber = Chemical.formatChemicalNumber;
 
 
 function setNotationMode(mode) {
@@ -318,15 +435,33 @@ function fNumRouter({m,e}) {
   if (notationMode === "roman") {
     return RomanFormatter.formatDecimal({m,e});
   }
+  if (notationMode === "chemical") {
+    return Chemical.formatChemicalNumber({m,e});
+  }
   return fNum({m,e});
+}
+
+function renderTierValue(tier, data) {
+  return data && data.value !== undefined
+    ? data.value
+    : "Next googologism";
+}
+
+
+// Normal mergents are named and valued by the corresponding tier-table row.
+function getTierTableValue(tier) {
+  const data = tiers[tier - 1];
+  return renderTierValue(tier, data);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const sel = document.getElementById("notationSelect");
-  sel.addEventListener("change", e => {
-    setNotationMode(e.target.value);
-    render();
-  });
+  if (sel) {
+    sel.addEventListener("change", e => {
+      setNotationMode(e.target.value);
+      render();
+    });
+  }
 });
 
 
@@ -360,7 +495,7 @@ const tiers = [
 
 {name:"Voidend",value:"(10↑↑↑10)-1"},
 {name:"Void Fire",value:"(9↑↑8↑↑7↑↑6↑↑5↑↑4↑↑3↑↑2)-1"},
-{name:"Void Onionmine",value:"(10↑↑21,042,141,113,214,300215)-1"},
+{name:"Void Onionmine",value:"(10↑↑21,042,141,113,214,300,215)-1"},
 {name:"Voidmine",value:"(10↑↑215)-1"},
 {name:"One Deckerth",value:"1/(10↑↑10)"},
 {name:"Betillion",value:"(10↑↑9)-1"},
@@ -1760,7 +1895,7 @@ const tiers = [
 {name:"Godoctol",value:"{100, 100 [1 [1 [1 [1, 2] 2] 2] 2] 2}"},
 {name:"Nonitetrom",value:"{10, 10 [1 [1 [1 [1, 2] 2] 2] 2] 2}"},
 {name:"Goseptiplexulus",value:"{10, 100 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
-{name:"GodentalGodentoalGodentol",value:"{100, 100 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
+{name:"Godentol",value:"{100, 100 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
 {name:"Dekotetrom",value:"{10, 10 [1 [1 [1 [1 [2] 2] 2] 2] 2] 2}"},
 {name:"Gooctiplexulus",value:"{10, 100 [1 [1 [1 [1 [1, 2] 2] 2] 2] 2] 2}"},
 {name:"Goddekathol",value:"{100, 100 [1 [1 [1 [1 [1, 2] 2] 2] 2] 2] 2}"},
@@ -3113,6 +3248,23 @@ const tiers = [
 
 
 ];
+let prestigePoints = 0;
+let prestigeUpgrades = 0;
+let prestigeMergentUpgrades = 0;
+let prestigeGrid = Array(25).fill(0);
+
+let selectedPrestige = -1;
+
+try {
+  const savedPrestige = JSON.parse(localStorage.getItem("micronym_prestige"));
+  if (savedPrestige && Array.isArray(savedPrestige.grid) && (savedPrestige.grid.length === 25 || savedPrestige.grid.length === 16)) {
+    prestigePoints = Number(savedPrestige.points) || 0;
+    prestigeUpgrades = Number(savedPrestige.upgrades) || 0;
+    prestigeMergentUpgrades = Number(savedPrestige.mergentUpgrades) || 0;
+    prestigeGrid = savedPrestige.grid.map(t => Number.isInteger(t) && t >= 0 ? t : 0);
+    while (prestigeGrid.length < 25) prestigeGrid.push(0);
+  }
+} catch (e) {}
 
 
 
@@ -3302,7 +3454,7 @@ try{
 function getBase(){
 
   return Math.max(
-    3.01
+    3.0275
 
     
   );
@@ -3317,13 +3469,31 @@ function getCost(){
       upgradeTier
     );
 
-  return nNew(
-    power.m*10000/Math.log(upgradeTier*(Math.log(upgradeTier*10+1))),
-    power.e
+  // The original formula divides by log(0) at the start of a run,
+  // producing an invalid/infinite cost.
+  const divisor = Math.max(
+    1,
+    Math.log(Math.max(1, upgradeTier) * Math.log(upgradeTier * 10 + 1) + 1)
   );
+
+  return nNew(power.m * 10000 / divisor, power.e);
 
 }
 
+function getPrestigeUpgradeCost() {
+  return Math.pow(2, prestigeUpgrades + 1);
+}
+
+function buyPrestigeUpgrade() {
+  const cost = getPrestigeUpgradeCost();
+  if (prestigePoints < cost) return;
+
+  prestigePoints -= cost;
+  prestigeUpgrades += 1;
+
+  save();
+  render();
+}
 
 /* =========================================================
    SPAWN
@@ -3332,7 +3502,7 @@ function getCost(){
 function getSpawnTier(){
 
   return Math.min(
-    upgradeTier+1,
+    upgradeTier + 1 + prestigeUpgrades,
     tiers.length
   );
 
@@ -3370,6 +3540,16 @@ function save(){
     bestTileAllTime
   );
 
+  localStorage.setItem(
+    "micronym_prestige",
+    JSON.stringify({
+      points: prestigePoints,
+      upgrades: prestigeUpgrades,
+      mergentUpgrades: prestigeMergentUpgrades,
+      grid: prestigeGrid
+    })
+  );
+
 }
 
 
@@ -3388,7 +3568,7 @@ function tierColor(tier){
     const hue = (((tier - 1) % 360) + 1) * 5;
     return `hsl(${hue},100%,50%)`;
   }
-else if (tier > 720 && tier < 1400) {
+else if (tier > 720 && tier <= 1400) {
   // After 720 → gradient based on hue
   const hue = (((tier - 1) % 360) + 1) * 5;
 
@@ -3397,16 +3577,15 @@ else if (tier > 720 && tier < 1400) {
 
   return `linear-gradient(90deg, ${c1}, ${c2})`;
 }
-else if (tier > 1400 && tier < 2100) {
-  // After 720 → gradient based on hue
-  const hue = (((tier - 1) % 360) + 1) * 5;
-
+else if (tier >= 1401 && tier <= 2100) {
+  // 1401-2100 → move backward through the hue spectrum
+  const hue = -((((tier - 1) % 360) + 1) * 5);
   const c1 = `hsl(${hue},100%,50%)`;
   const c2 = `hsl(${(hue - 45) % 360},100%,50%)`;
 
-  return `linear-gradient(90deg, ${c1}, ${c2})`;
+  return `linear-gradient(270deg, ${c2}, ${c1})`;
 }
-else if (tier > 2100 && tier < 2800) {
+else if (tier >= 2101 && tier <= 2800) {
   // After 720 → gradient based on hue
   const hue = (((tier - 1) % 360) + 1) * 5;
 
@@ -3415,15 +3594,15 @@ else if (tier > 2100 && tier < 2800) {
 
   return `linear-gradient(135deg, ${c1}, ${c2})`;
 }
-else if (tier > 2800 && tier < 3500) {
+else if (tier >= 2801 && tier <= 3500) {
   // After 720 → gradient based on hue
-  const hue = (((tier - 1) % 360) + 1) * 5;
+  const hue = -(((tier - 1) % 360) + 1) * 5;
 
   const c1 = `hsl(${hue},100%,50%)`;
   const c2 = `hsl(${(hue + 45) % 360},100%,50%)`;
 
-  return `linear-gradient(135deg, ${c1}, ${c2})`;
-}
+  return `linear-gradient(315deg, ${c1}, ${c2})`;
+} 
 
 }
 
@@ -3573,6 +3752,104 @@ document.addEventListener("keydown",(e)=>{
   }
 
 });
+function getPrestigeGain() {
+  // Use the normalized scientific-notation representation. A value stored as
+  // { m, e } means m * 10^e, and the total order of magnitude is e + log10(m).
+  if (!coins || !Number.isFinite(coins.m) || !Number.isFinite(coins.e) || coins.m <= 0) {
+    return 0;
+  }
+
+  const magnitude = coins.e + Math.log10(coins.m);
+  return Math.max(0, Math.floor(magnitude));
+}
+
+function prestige() {
+  const gain = getPrestigeGain();
+  if (gain <= 308) return;
+
+  prestigePoints += gain;
+
+  grid = Array(64).fill(0);
+  coins = { m: 0, e: 0 };
+  Income = { m: 0, e: 0 };
+  upgradeTier = 0;
+  maxTileInRun = 1;
+  selected = null;
+  selectedPrestige = -1;
+  mergeAllCooldown = false;
+
+  fillBoard();
+  save();
+  render();
+}
+
+function spawnPrestigeMergent() {
+  const cost = Math.pow(1.3, prestigeMergentUpgrades + 1);
+  if (prestigePoints < cost) return;
+
+  const empty = prestigeGrid.indexOf(0);
+  if (empty === -1) return;
+
+  prestigePoints -= cost;
+  prestigeGrid[empty] = 1 +  prestigeMergentUpgrades;
+  render();
+}
+
+function getPrestigeMergentUpgradeCost() {
+  return Math.pow(6, prestigeMergentUpgrades + 1);
+}
+
+function buyPrestigeMergentUpgrade() {
+  const cost = getPrestigeMergentUpgradeCost();
+  if (prestigePoints < cost) return;
+
+  prestigePoints -= cost;
+  prestigeMergentUpgrades += 1;
+
+  // Match the normal mergent upgrade: bring every existing prestige
+  // mergent below the new spawn tier up to that tier.
+  const spawn = 1 + prestigeMergentUpgrades;
+  prestigeGrid.forEach((tier, index) => {
+    if (tier > 0 && tier < spawn) {
+      prestigeGrid[index] = spawn;
+    }
+  });
+
+  save();
+  render();
+}
+
+function clickPrestigeTile(index) {
+  const tier = prestigeGrid[index];
+
+  if (selectedPrestige === -1) {
+    if (tier > 0) selectedPrestige = index;
+    render();
+    return;
+  }
+
+  if (selectedPrestige === index) {
+    selectedPrestige = -1;
+    render();
+    return;
+  }
+
+  const otherTier = prestigeGrid[selectedPrestige];
+  if (tier > 0 && tier === otherTier) {
+    prestigeGrid[index] = tier + 1;
+    prestigeGrid[selectedPrestige] = 0;
+  }
+
+  selectedPrestige = -1;
+  save();
+  render();
+}
+
+function showTab(name) {
+  document.getElementById("tab-normal").style.display = name === "normal" ? "block" : "none";
+  document.getElementById("tab-pboard").style.display = name === "pboard" ? "block" : "none";
+  document.getElementById("tab-pupgrades").style.display = name === "pupgrades" ? "block" : "none";
+}
 
 /* =========================================================
    CLICK TILE
@@ -3612,8 +3889,6 @@ function clickTile(index){
     return;
 
   }
-
-
   /* =====================================================
      SAME TIER = NEXT GOOGOLOGISM
      ===================================================== */
@@ -3842,6 +4117,64 @@ document.getElementById("s").innerText =
     "SPAWN KAFELKÓW: TIER "+
     spawn;
 
+  renderPrestigeBoard();
+  renderPrestigeUpgrades();
+  const prestigeButton = document.getElementById("spawnPrestigeBtn");
+  prestigeButton.disabled = prestigePoints < 1 || prestigeGrid.indexOf(0) === -1;
+  prestigeButton.innerText = "BUY PRESTIGE MERGENT (1 PP)";
+
+  function renderPrestigeBoard() {
+  const el = document.getElementById("prestigeBoard");
+  el.innerHTML = "";
+
+  prestigeGrid.forEach((tier, i) => {
+    const tile = document.createElement("div");
+    tile.className = "tile prestige-tile";
+    tile.onclick = () => clickPrestigeTile(i);
+
+    if (tier === 0) {
+      tile.classList.add("empty");
+      tile.title = "Empty prestige tile";
+    } else {
+      const data = tiers[tier - 1];
+      const name = data ? data.name : "Prestige Tier " + tier;
+      const value = data ? renderTierValue(tier, data) : "Next prestige googologism";
+
+      tile.style.background = tierColor(tier);
+
+      const text = document.createElement("div");
+      text.className = "tile-name";
+      text.innerHTML = `<b>${escapeHTML(name)}</b><br><small>${escapeHTML(value)}</small>`;
+      tile.appendChild(text);
+
+      const tierText = document.createElement("div");
+      tierText.className = "tile-tier";
+      tierText.innerText = "P" + tier;
+      tile.appendChild(tierText);
+    }
+
+    if (selectedPrestige === i) tile.classList.add("selected");
+    el.appendChild(tile);
+  });
+
+function getPrestigeBoardBoost(){
+  return 1 + prestigeGrid.reduce((sum, tier) => sum + tier, 0) * 0.1;
+}
+  document.getElementById("prestigeBoardBoost").innerText =
+    "Prestige Points: " + prestigePoints + " | Board Boost: x" +
+    getPrestigeBoardBoost().toFixed(1);
+}
+
+function renderPrestigeUpgrades() {
+  document.getElementById("prestigeUpgradeInfo").innerText =
+    "PP: " + prestigePoints +
+    "\nUpgrades: " + prestigeUpgrades +
+    "\nNext Cost: " + getPrestigeUpgradeCost() + " PP";
+
+  document.getElementById("prestigeMergentUpgradeInfo").innerText =
+    "Mergent Upgrades: " + prestigeMergentUpgrades +
+    "\nNext Cost: " + getPrestigeMergentUpgradeCost() + " PP";
+}
 
   /* =====================================================
      UPGRADE BUTTON
@@ -3911,10 +4244,7 @@ document.getElementById("s").innerText =
             ?data.name
             :"Tier "+tier;
 
-        const value=
-          data
-            ?data.value
-            :"Next googologism";
+        const value=getTierTableValue(tier);
 
 
         tile.style.background=
@@ -3982,11 +4312,6 @@ document.getElementById("s").innerText =
     }
   );
 
-document.getElementById("notationSelect").addEventListener("change", e => {
-  setNotationMode(e.target.value);
-  render();
-});
-
   /* =====================================================
      BEST TILE
      ===================================================== */
@@ -4025,29 +4350,30 @@ let Income = {
 /* =========================================================
    PASSIVE COINS (200ms)
    ========================================================= */
+function getPrestigeBoardBoost(){
+  return 1 + prestigeGrid.reduce((sum, tier) => sum + tier, 0) * 0.1;
+}
+
+
+// GAME TICK — 20 razy na sekundę (50ms)
+// TICK — tylko income i coins
 setInterval(() => {
-  Income = { m: 0, e: 0 };
+    let newIncome = { m: 0, e: 0 };
+    grid.forEach(tier => {
+        if (tier > 0) {
+        newIncome = nAdd(newIncome, nPow(3, tier));
+        }
+    });
+    Income = nNew(newIncome.m * getPrestigeBoardBoost(), newIncome.e);
 
-  grid.forEach(tier => {
-    if (tier > 0) {
-      Income = nAdd(Income, nPow(2.999, tier));
-    }
-  });
-
-  coins = nAdd(coins, Income);
-
+    coins = nAdd(coins, Income);
 }, 1000);
 
+// RENDER — tylko UI
 setInterval(() => {
-  save();
- 
+    render();
 }, 1000);
-/* =========================================================
-   RENDER + SAVE (1000ms)
-   ========================================================= */
-setInterval(() => {
-  render();
-}, 1000);
+
 
 
 /* =========================================================
